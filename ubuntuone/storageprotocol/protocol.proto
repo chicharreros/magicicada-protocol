@@ -1,0 +1,619 @@
+/*
+ ubuntuone.storageprotocol.protocol_pb2 - storage protocol
+
+ Copyright 2009-2012 Canonical Ltd.
+
+ This program is free software: you can redistribute it and/or modify it
+ under the terms of the GNU Affero General Public License version 3,
+ as published by the Free Software Foundation.
+
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranties of
+ MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR
+ PURPOSE.  See the GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ In addition, as a special exception, the copyright holders give
+ permission to link the code of portions of this program with the
+ OpenSSL library under certain conditions as described in each
+ individual source file, and distribute linked combinations
+ including the two.
+ You must obey the GNU General Public License in all respects
+ for all of the code used other than OpenSSL.  If you modify
+ file(s) with this exception, you may extend this exception to your
+ version of the file(s), but you are not obligated to do so.  If you
+ do not wish to do so, delete this exception statement from your
+ version.  If you delete this exception statement from all source
+ files in the program, then also delete it here.
+*/
+package ubuntuone.storageprotocol;
+
+option java_package = "com.ubuntuone.storageprotocol";
+option java_outer_classname = "StorageProtocol";
+
+message Message {
+    required int32 id = 1; // A session-unique number identifying the
+                           // request that started this exchange
+
+    enum MessageType {
+        NOOP = 0;
+        ERROR = 1;
+        OK = 2;
+        PING = 3;
+        PONG = 4;
+        PROTOCOL_VERSION = 5;
+        AUTH_REQUEST = 6;
+        AUTH_REQUEST_TOKEN = 7;       // unused
+        AUTH_REQUEST_TOKEN_READY = 8; // unused
+        AUTH_AUTHENTICATED = 9;
+        ROOT = 10;
+        MAKE_DIR = 11;
+        MAKE_FILE = 12;
+        NEW_DIR = 13;           // answer to MAKE_DIR
+        NEW_FILE = 14;          // answer to MAKE_FILE
+        QUERY = 15;
+        NODE_STATE = 16;
+        QUERY_END = 17;
+        GET_CONTENT = 18;
+        PUT_CONTENT = 19;
+        BEGIN_CONTENT = 20;
+        BYTES = 21;
+        EOF = 22;
+        MOVE = 23;
+        UNLINK = 24;
+
+        CREATE_SHARE = 25;      // enable the sharing for a given node
+        LIST_SHARES = 26;       // list all the shares
+        SHARES_INFO = 27;       // answer to LIST_SHARES, one message per share
+        SHARES_END = 28;        // no more SHARES_INFO
+        NOTIFY_SHARE = 29;      // notifies the presence of a new share
+        SHARE_ACCEPTED = 30;    // notifies whether a share was accepted or not
+        SHARE_DELETED = 31;     // answer to DELETE_SHARE (the share was disabled)
+        SHARE_CREATED = 34;     // answer to CREATE_SHARE, returns share id
+        DELETE_SHARE = 36;      // disable the sharing for a given node
+
+        CREATE_UDF = 44;        // register a new UDF against the server
+        LIST_VOLUMES = 45;      // list all volumes (UDFs plus accepted shares)
+        VOLUMES_INFO = 46;      // answer to LIST_VOLUMES, one message per volume
+        VOLUMES_END = 47;       // no more VOLUMES_INFO
+        VOLUME_DELETED = 48;    // answer to DELETE_VOLUME (the volume was deleted)
+        VOLUME_CREATED = 49;    // answer to CREATE_UDF or a share was accepted
+        DELETE_VOLUME = 50;     // removes the UDF and its files from the server
+        VOLUME_NEW_GENERATION = 54;  // server notification that the volume is in a new generation
+
+        CANCEL_REQUEST = 32;
+        NODE_ATTR = 33;
+        CANCELLED = 35;
+        QUERY_CAPS = 37;        // client2server, no commitment
+        SET_CAPS = 38;          // client2server, commitment from the server
+        ACCEPT_CAPS = 39;       // server2client, the answer for previous two
+        FREE_SPACE_INFO = 40;   // answer to FREE_SPACE_INQUIRY
+        FREE_SPACE_INQUIRY = 41;
+        ACCOUNT_INFO = 42;      // answer to ACCOUNT_INQUIRY
+        ACCOUNT_INQUIRY = 43;
+
+        GET_DELTA = 51;          // ask for a delta
+        DELTA_INFO = 52;         // a row of the delta
+        DELTA_END = 53;          // marks the end of a delta
+    }
+
+    required MessageType type = 2; // The type of the message contained
+
+    // login and setup
+    optional Error error = 3;
+    optional Protocol protocol = 4;
+    repeated AuthParameter auth_parameters = 5;
+    repeated KeyValue metadata = 44; // extra info we want to send to the server
+    optional bytes session_id = 42; // sent with AUTH_AUTHENTICATED
+                                    // for logging purposes
+    optional Root root = 6;
+
+    // change monitoring
+    repeated Query query = 7;
+    optional NodeState node_state = 8;
+    // directory management
+    optional Make make = 9;
+    optional New new = 10;
+    optional Move move = 11;
+    optional GetContent get_content = 12;
+    optional PutContent put_content = 13;
+    optional UploadInProgress upload_in_progress = 14;
+    optional Bytes bytes = 15;
+    optional Unlink unlink = 16;
+    optional CancelRequest cancel_request = 17;
+    optional NodeAttr node_attr = 18;
+    optional uint64 new_generation = 43;
+
+    // share, UDf and volume management
+    optional CreateShare create_share = 19;
+    optional Shares shares = 20;
+    optional NotifyShare notify_share = 21;
+    optional ShareAccepted share_accepted = 22;
+    optional ShareDeleted share_deleted = 23;
+    optional ShareCreated share_created = 24;
+    optional DeleteShare delete_share = 25;
+
+    optional CreateUDF create_udf = 33;
+    optional Volumes list_volumes = 34;
+    optional VolumeDeleted volume_deleted = 35;
+    optional Volumes volume_created = 36;
+    optional DeleteVolume delete_volume = 37;
+    optional VolumeNewGeneration volume_new_generation = 41;
+
+    // caps
+    repeated QueryCaps query_caps = 26;
+    repeated SetCaps set_caps = 27;
+    optional AcceptCaps accept_caps = 28;
+
+    // account info
+    optional FreeSpaceInfo free_space_info = 29;
+    optional FreeSpaceInquiry free_space_inquiry = 30;
+    optional AccountInfo account_info = 31;
+
+    // upload info
+    optional BeginContent begin_content = 32;
+
+    // delta
+    optional GetDelta get_delta = 38;
+    optional DeltaInfo delta_info = 39;
+    optional DeltaEnd delta_end = 40;
+}
+
+message Error {
+    enum ErrorType {
+        UNSUPPORTED_VERSION = 0;
+        AUTHENTICATION_FAILED = 1;
+        INTERNAL_ERROR = 2;
+        AUTHENTICATION_REQUIRED = 3;
+        NO_PERMISSION = 4;
+        ALREADY_EXISTS = 5;
+        DOES_NOT_EXIST = 6;
+        NOT_A_DIRECTORY = 7;
+        NOT_EMPTY = 8;
+        NOT_AVAILABLE = 9;
+        UPLOAD_IN_PROGRESS = 10;
+        UPLOAD_CORRUPT = 11;
+        UPLOAD_CANCELED = 12;
+        CONFLICT = 13;
+        TRY_AGAIN = 14;
+        PROTOCOL_ERROR = 15;
+        QUOTA_EXCEEDED = 16;
+        INVALID_FILENAME = 17;
+        CANNOT_PRODUCE_DELTA = 18;
+    }
+    required ErrorType type = 1;
+    optional string comment = 2;
+}
+
+message Protocol {
+    required int32 version = 1;
+}
+
+message AuthParameter {
+    required string name = 1;
+    required string value = 2;
+}
+
+message KeyValue {
+    required string key = 1;
+    required string value = 2;
+}
+
+message Make {
+    optional bytes share = 1; // share is actually a volume id
+    optional bytes parent_node = 2;
+    optional string name = 3;
+}
+
+message New {
+    optional bytes node = 1;
+    optional bytes parent_node = 2;
+    optional string name = 3;
+}
+
+message Root {
+    optional bytes node = 1;
+    optional uint64 generation = 2;
+    optional uint64 free_bytes = 3;
+}
+
+message Query {
+    optional bytes share = 1;
+    optional bytes node = 2;
+    optional bytes hash = 3;
+}
+
+message NodeState {
+    optional bytes share = 1;
+    optional bytes node = 2;
+    optional bytes hash = 3;
+}
+
+message GetContent {
+    optional bytes share = 1;
+    optional bytes node = 2;
+    optional bytes hash = 3;
+    optional int64 offset = 4;
+}
+
+message CancelRequest {
+}
+
+message NodeAttr {
+    optional uint64 deflated_size = 1;
+    optional uint64 size = 2;
+    optional bytes hash = 3;
+    optional uint32 crc32 = 4;
+}
+
+message Bytes {
+    optional bytes bytes = 1;
+}
+
+message PutContent {
+    optional bytes share = 1;
+    optional bytes node = 2;
+    optional bytes previous_hash = 3;
+    optional bytes hash = 4;
+    optional uint32 crc32 = 5;
+    optional uint64 size = 6;
+    optional uint64 deflated_size = 7;
+    optional bytes upload_id = 8;
+    optional bytes magic_hash = 9;
+}
+
+message BeginContent {
+    optional uint64 offset = 2;
+    optional bytes upload_id = 3;
+}
+
+message UploadInProgress {
+    optional bytes upload = 1;
+    optional int32 timestamp = 2;
+}
+
+message Move {
+    optional bytes share = 1;
+    optional bytes node = 2;
+    optional bytes new_parent_node = 3;
+    optional string new_name = 4;
+}
+
+message Unlink {
+    optional bytes share = 1;
+    optional bytes node = 2;
+}
+
+message CreateShare {
+    enum AccessLevel {
+        VIEW = 0;
+        MODIFY = 1;
+    }
+    optional bytes node = 1;
+    // share_to is the utf-8 encoded version of share_to
+    optional string share_to = 2;
+    optional string name = 3;
+    optional AccessLevel access_level = 4;
+}
+
+message Shares {
+    // Direction should be extensible in case we want to share to all,
+    // for example, that's why I didn't use a bool
+    enum Direction {
+        TO_ME = 0;
+        FROM_ME = 1;
+    }
+
+    enum AccessLevel {
+        VIEW = 0;
+        MODIFY = 1;
+    }
+
+    optional bytes share_id = 1;
+    optional Direction direction = 2;
+    optional bytes subtree = 3;
+
+    // following three unicode strings should be sent as utf8
+    optional string share_name = 4;
+    optional string other_username = 5;
+    optional string other_visible_name = 6;
+
+    optional bool accepted = 7;
+    optional AccessLevel access_level = 8;
+    optional uint64 generation = 9;
+    optional uint64 free_bytes = 10;
+    // only for shares FROM_ME
+    optional bytes subtree_volume_id = 11;
+}
+
+message NotifyShare {
+    enum AccessLevel {
+        VIEW = 0;
+        MODIFY = 1;
+    }
+    optional string share_id = 1;
+    optional string subtree = 2;
+
+    // the following three are utf-8 encoded
+    optional string share_name = 3;
+    optional string from_username = 4;
+    optional string from_visible_name = 5;
+
+    optional AccessLevel access_level = 6;
+}
+
+message ShareAccepted {
+    enum Answer {
+        YES = 0;
+        NO = 1;
+    }
+    optional string share_id = 1;
+    optional Answer answer = 2;
+}
+
+message ShareDeleted {
+    optional string share_id = 1;
+}
+
+message ShareCreated {
+    optional string share_id = 1;
+}
+
+message DeleteShare {
+    optional string share_id = 1;
+}
+
+message CreateUDF {
+    // path and name should be encoded with utf8
+    optional string path = 1;
+    optional string name = 2;
+}
+
+message UDFs {
+    optional bytes volume = 1;
+    optional bytes node = 2;
+    // suggested path should be encoded with utf8
+    optional string suggested_path = 3;
+    optional uint64 generation = 4;
+    optional uint64 free_bytes = 5;
+}
+
+message VolumeDeleted {
+    optional bytes volume = 1;
+}
+
+message DeleteVolume {
+    optional bytes volume = 1;
+}
+
+message Volumes {
+
+    enum VolumeType {
+        ROOT = 1;
+        SHARE = 2;
+        UDF = 3;
+    }
+
+    optional VolumeType type = 1;
+
+    // specific for a Root
+    optional Root root = 3;
+
+    // specific for a UDF
+    optional UDFs udf = 4;
+
+    // specific for share with direction "to me" and already accepted
+    optional Shares share = 5;
+}
+
+message QueryCaps {
+    optional string capability = 1;
+}
+
+message SetCaps {
+    optional string capability = 1;
+}
+
+message AcceptCaps {
+    optional bool accepted = 1;
+    optional string redirect_hostname = 2;
+    optional string redirect_port = 3;
+    optional string redirect_srvrecord = 4;
+}
+
+message FreeSpaceInfo {
+    optional string share_id = 1;
+    optional uint64 free_bytes = 2;
+}
+
+message FreeSpaceInquiry {
+    optional string share_id = 1;
+}
+
+message AccountInfo {
+    optional uint64 purchased_bytes = 1;
+}
+
+message VolumeNewGeneration {
+    optional bytes volume = 1;
+    optional uint64 generation = 2;
+}
+
+message GetDelta {
+    optional bytes share = 1;
+    optional uint64 from_generation = 2;
+    optional bool from_scratch = 3;
+}
+
+message DeltaInfo {
+    optional uint64 generation = 1;
+    optional bool is_live = 2;
+    enum DeltaInfoType {
+        FILE_INFO = 1;
+    }
+    optional DeltaInfoType type = 3;
+    optional FileInfo file_info = 4;
+}
+
+message FileInfo {
+    enum FileType {
+        DIRECTORY = 0;
+        FILE = 1;
+        SYMLINK = 2;
+    }
+    optional FileType type = 1;
+    optional bytes parent = 2;
+    optional bytes share = 3;
+    optional bytes node = 4;
+    optional string name = 5;
+    optional bool is_public = 6;
+    optional bytes content_hash = 7;
+    optional uint32 crc32 = 8;
+    optional uint64 size = 9;
+    optional uint64 last_modified = 10;
+}
+
+message DeltaEnd {
+    optional uint64 generation = 1;
+    optional bool full = 2; // full delta means nothing is pending
+    optional uint64 free_bytes = 3; // this will be just a hint if full == False
+}
+
+/*
+== changes ==
+
+1. introduce a message from the server saying that there's a share available
+   with this name, this file id at its root
+
+2. we need a message from the server saying when a share is withdrawn
+
+3. when you authenticate, the server sends a bunch of "share available"
+   messages.  the user's own idisk thing is just one such share.
+
+4. the names of shares are specific to a particular user who sees the shares.
+   so, compare tables: user <---> shareview <--> share
+
+   objects(id), shares(object, name, user), user(id)
+
+5. the user needs the ability to get rid of a share from someone else.
+
+6. the user needs the ability to name a share.
+
+== Protocol ==
+
+Content streams for directories consist of a sequence of protobuffed
+(name, node) pairs, ordered by byte ordering of name.
+
+Even request ids are reserved for server-initiated request sequences,
+odd request ids are reserved for client-initiated request sequences.
+
+Hashes include an identifier specifying the hash algorithm ('sha1' for
+SHA-1).
+
+S:root(id, node) -- the user's volume root is root
+
+C:query(id, *nodes) -- request content hashes for the given nodes
+next: S:updated
+
+S:updated(id, *(node, hash)) -- the content of the given nodes has
+                                been updated to the given hashes;
+                                may be in response to C:query, or
+                                also spontaneous
+next: none
+
+S:cancel(id), C:cancel(id) -- cancels an exchange
+next: none
+
+C:getcontent(id, node, hash, offset) -- requests a content stream for the given
+                                  node with content hash starting
+                                  at the given offset
+next: S:nodeattr, S:error:unavailable
+
+S:nodeattr(id, deflated_size, size, hash, crc32) -- the attributes of
+                                                    the content to come
+next: S:bytes, S:eof
+
+S:bytes(id, bytes) -- bytes of content
+next: S:bytes, S:eof
+
+S:eof(id) -- end of stream
+next: none
+
+C:getdelta(id, hash, offset, old_hash, old_offset) --
+    requests a delta stream relative to old content/offset;
+    devolves to regular stream (S:bytes) if old content not
+    available
+next: S:bytes, S:replace, S:skip, S:eof
+
+S:replace(id, bytes, count) -- replace count bytes with bytes
+next: S:replace, S:skip, S:eof
+
+S:copy(id, count) -- copy count bytes unchanged
+next: S:replace, S:skip, S:eof
+
+C:putcontent(id, node, hash, crc32, size) -- starts a raw content upload
+                                                for a given node
+next: S:begincontent
+
+S:begincontent(id, offset) -- ok to begin sending content at offset
+next: C:bytes, C:eof
+
+C:bytes(id, bytes) -- bytes of content
+next: C:bytes, C:eof
+
+C:eof(id) -- end of stream
+next: S:ok, S:error:corrupt
+
+S:ok(id) -- upload accepted
+next: none
+
+S:error:corrupt(id) -- the uploaded data was corrupt (checksum mismatch, etc.)
+next: none
+
+C:uploaddelta(id, hash, crc32, size, old_hash, old_offset) --
+    starts a delta stream upload, or a raw content upload if
+    the old content is not available
+next: S:begindelta, S:begincontent
+
+S:begindelta(id, upload) -- ok to begin sending delta
+next: C:replace, C:copy, C:eof
+
+C:replace(id, bytes, count) -- replace count bytes with bytes
+next: C:replace, C:copy, C:eof
+
+C:copy(id, count) -- copy count bytes unchanged
+next: C:replace, C:copy, C:eof
+
+C:resume(id, upload) -- resume an interrupted upload
+next: S:resumecontent, S:resumedelta
+
+S:resumecontent(id, offset) -- resume sending content at offset
+next: C:bytes, C:eof
+
+S:resumedelta(id, offset) -- resume sending delta at offset
+next: C:resumingdelta(id, old_offset)
+
+C:resumingdelta(id, old_offset) -- resuming delta at old_offset in old content
+next: C:replace, C:copy, C:eof
+
+C:dir(id, parent, name) -- create a new (empty) directory node
+next: S:newdir
+
+S:newdir(id, node) -- a new directory node has been created
+next: none
+
+C:file(id, parent, name) -- create a new (empty) file node
+next: S:newfile
+
+S:newfile(id, node) -- a new file node has been created
+next: none
+
+C:symlink(id, parent, name, target) -- create a new symlink node
+next: S:newsymlink
+
+S:newsymlink(id, node) -- a new symlink has been created
+next: none
+
+*/

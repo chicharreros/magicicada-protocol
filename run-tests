@@ -1,0 +1,36 @@
+#!/bin/bash
+#
+# Copyright 2010 Canonical Ltd.
+#
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Affero General Public License version 3,
+# as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranties of
+# MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+
+SYSNAME=`uname -s`
+
+PROTOC_VERSION_AS_INT=`protoc --version | cut -d' ' -f2 | awk -F. '{ print $ 1 * 1000 + $2 * 100 + $ 3; }'`
+
+/usr/bin/env python setup.py build
+# run the tests with pure python protobuf
+PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python u1trial tests
+if [ "$SYSNAME" != "Darwin" ]; then
+    # and with the cpp extension, for server (linux) only:
+    if [ $PROTOC_VERSION_AS_INT -lt 2500 ]; then
+        PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp u1trial tests
+    fi
+fi
+
+USE_PYFLAKES=1 u1lint
+/usr/bin/env python setup.py clean
+rm -rf build
+pep8 --repeat --ignore=E126,E127,E128 --exclude="*_pb2.py,.bzr,.pc,build" .
+rm -rf _trial_temp

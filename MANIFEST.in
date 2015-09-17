@@ -1,0 +1,8 @@
+include MANIFEST.in
+include COPYING HACKING README README.windows
+include LICENSE LICENSE.OpenSSL
+include run-tests
+include *.pth
+recursive-include ubuntuone *.proto
+recursive-include samples *.py
+recursive-include tests *.py
