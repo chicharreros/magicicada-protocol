@@ -21,8 +21,6 @@ import os
 import sys
 import subprocess
 
-sys.path.insert(0, os.path.abspath("."))
-
 from distutils.core import setup
 from distutils.spawn import find_executable
 from distutils.command import clean, build

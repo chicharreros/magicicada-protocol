@@ -256,8 +256,9 @@ def skip_error(failure, error):
         return failure
 
 
-# deferred utilities
-skip_result = lambda _, f, *args, **kwargs: f(*args, **kwargs)
+def skip_result(_, f, *args, **kwargs):
+    """Deferred utilities."""
+    return f(*args, **kwargs)
 
 
 def sr_result(result, f, *args, **kwargs):

@@ -21,11 +21,11 @@ PROTOC_VERSION_AS_INT=`protoc --version | cut -d' ' -f2 | awk -F. '{ print $ 1 *
 
 /usr/bin/env python setup.py build
 # run the tests with pure python protobuf
-PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python u1trial tests
+SSL_CERTIFICATES_DIR=tests/certs PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python u1trial tests
 if [ "$SYSNAME" != "Darwin" ]; then
     # and with the cpp extension, for server (linux) only:
     if [ $PROTOC_VERSION_AS_INT -lt 2500 ]; then
-        PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp u1trial tests
+        SSL_CERTIFICATES_DIR=tests/certs PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp u1trial tests
     fi
 fi
 

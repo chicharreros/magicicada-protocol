@@ -135,7 +135,7 @@ def test_response(response_string, auth=None):
         if auth is not None:
             auth_line = "Proxy-Authorization: Basic " + \
                 base64.b64encode("test:test")
-            if not auth_line in data:
+            if auth_line not in data:
                 proto.dataReceived("HTTP/1.0 403 Forbidden\r\n\r\n")
             else:
                 proto.dataReceived(response_string)

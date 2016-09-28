@@ -82,12 +82,12 @@ if __name__ == "__main__":
     reactor.connectTCP('75.101.137.174', 80, PingClientFactory())
 
     # using ssl
-    #reactor.connectSSL('localhost', 20101, StorageClientFactory(),
+    # reactor.connectSSL('localhost', 20101, StorageClientFactory(),
     #           ssl.ClientContextFactory())
 
     # using ssl over a proxy
-    #from ubuntuone.storageprotocol import proxy_tunnel
-    #proxy_tunnel.connectHTTPS('localhost', 3128,
+    # from ubuntuone.storageprotocol import proxy_tunnel
+    # proxy_tunnel.connectHTTPS('localhost', 3128,
     #        'localhost', 20101, StorageClientFactory(),
     #        user="test", passwd="test")
 

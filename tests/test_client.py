@@ -135,6 +135,10 @@ def set_share_message(message):
     message.share.access_level = 0
 
 
+def noop_callback(*a):
+    """No op callback."""
+
+
 class MethodMock(object):
     """A class to overwrite methods to know if they were called.
 
@@ -258,9 +262,8 @@ class ClientTestCase(unittest.TestCase):
 
     def test_set_volume_deleted_callback(self):
         """Test callback setting."""
-        a_callback = lambda x: None
-        self.client.set_volume_deleted_callback(a_callback)
-        self.assertTrue(self.client._volume_deleted_callback is a_callback)
+        self.client.set_volume_deleted_callback(noop_callback)
+        self.assertTrue(self.client._volume_deleted_callback is noop_callback)
 
     def test_callback_must_be_callable(self):
         """Test set callback parameters."""
@@ -275,31 +278,33 @@ class ClientTestCase(unittest.TestCase):
 
     def test_set_volume_created_callback(self):
         """Test callback setting."""
-        a_callback = lambda y, z: None
-        self.client.set_volume_created_callback(a_callback)
-        self.assertTrue(self.client._volume_created_callback is a_callback)
+        self.client.set_volume_created_callback(noop_callback)
+        self.assertIs(self.client._volume_created_callback, noop_callback)
 
     def test_set_volume_new_generation_callback(self):
         """Test callback setting."""
-        cback = lambda y, z: None
-        self.client.set_volume_new_generation_callback(cback)
-        self.assertTrue(self.client._volume_new_generation_callback is cback)
+        self.client.set_volume_new_generation_callback(noop_callback)
+        self.assertIs(self.client._volume_new_generation_callback,
+                      noop_callback)
 
     # share notification callbacks
     def test_share_change_callback(self):
         """Test share_change callback usage."""
         self.assertRaises(TypeError, self.client.set_share_change_callback,
                           'hello')
-        #create a response and message
+        # create a response and message
         share_resp = sharersp.NotifyShareHolder.from_params(
             uuid.uuid4(), uuid.uuid4(), 'sname', 'byu', 'tou', 'View')
         proto_msg = protocol_pb2.Message()
         proto_msg.type = protocol_pb2.Message.NOTIFY_SHARE
         share_resp.dump_to_msg(proto_msg.notify_share)
 
-        #wire up a call back and make sure it's correct
+        # wire up a call back and make sure it's correct
         self.share_notif = None
-        a_callback = lambda notif: setattr(self, 'share_notif', notif)
+
+        def a_callback(notif):
+            setattr(self, 'share_notif', notif)
+
         self.client.set_share_change_callback(a_callback)
         self.assertTrue(self.client._share_change_callback is a_callback)
         self.client.handle_NOTIFY_SHARE(proto_msg)
@@ -315,9 +320,12 @@ class ClientTestCase(unittest.TestCase):
         proto_msg.type = protocol_pb2.Message.SHARE_DELETED
         proto_msg.share_deleted.share_id = str(share_id)
 
-        #wire up a call back and make sure it's correct
+        # wire up a call back and make sure it's correct
         self.deleted_share_id = None
-        a_callback = lambda notif: setattr(self, 'deleted_share_id', notif)
+
+        def a_callback(notif):
+            setattr(self, 'deleted_share_id', notif)
+
         self.client.set_share_delete_callback(a_callback)
         self.assertTrue(self.client._share_delete_callback is a_callback)
         self.client.handle_SHARE_DELETED(proto_msg)
@@ -334,9 +342,12 @@ class ClientTestCase(unittest.TestCase):
         proto_msg.share_accepted.share_id = str(share_id)
         proto_msg.share_accepted.answer = protocol_pb2.ShareAccepted.YES
 
-        #wire up a call back and make sure it's correct
+        # wire up a call back and make sure it's correct
         self.answer = None
-        a_callback = lambda s, a: setattr(self, 'answer', (s, a))
+
+        def a_callback(s, a):
+            setattr(self, 'answer', (s, a))
+
         self.client.set_share_answer_callback(a_callback)
         self.assertTrue(self.client._share_answer_callback is a_callback)
         self.client.handle_SHARE_ACCEPTED(proto_msg)
@@ -347,8 +358,8 @@ class ClientTestCase(unittest.TestCase):
         """Test handle_VOLUME_NEW_GENERATION with an uuid id."""
         # set the callback to record the info
         called = []
-        f = lambda *a: called.append(a)
-        self.client.set_volume_new_generation_callback(f)
+        self.client.set_volume_new_generation_callback(
+            lambda *a: called.append(a))
 
         # create the message
         message = protocol_pb2.Message()
@@ -365,8 +376,8 @@ class ClientTestCase(unittest.TestCase):
         """Test handle_VOLUME_NEW_GENERATION for ROOT."""
         # set the callback to record the info
         called = []
-        f = lambda *a: called.append(a)
-        self.client.set_volume_new_generation_callback(f)
+        self.client.set_volume_new_generation_callback(
+            lambda *a: called.append(a))
 
         # create the message
         message = protocol_pb2.Message()
@@ -393,7 +404,10 @@ class ClientTestCase(unittest.TestCase):
     def test_handle_root_created_passes_a_root(self):
         """Test handle_VOLUME_CREATED parameter passing."""
         self.volume = None
-        a_callback = lambda vol: setattr(self, 'volume', vol)
+
+        def a_callback(vol):
+            setattr(self, 'volume', vol)
+
         self.client.set_volume_created_callback(a_callback)
 
         message = build_volume_created()
@@ -406,7 +420,10 @@ class ClientTestCase(unittest.TestCase):
     def test_handle_udf_created_passes_a_udf(self):
         """Test handle_VOLUME_CREATED parameter passing."""
         self.volume = None
-        a_callback = lambda vol: setattr(self, 'volume', vol)
+
+        def a_callback(vol):
+            setattr(self, 'volume', vol)
+
         self.client.set_volume_created_callback(a_callback)
 
         message = build_volume_created()
@@ -419,7 +436,10 @@ class ClientTestCase(unittest.TestCase):
     def test_handle_share_created_passes_a_share(self):
         """Test handle_VOLUME_CREATED parameter passing."""
         self.volume = None
-        a_callback = lambda vol: setattr(self, 'volume', vol)
+
+        def a_callback(vol):
+            setattr(self, 'volume', vol)
+
         self.client.set_volume_created_callback(a_callback)
 
         message = build_volume_created()
@@ -428,14 +448,6 @@ class ClientTestCase(unittest.TestCase):
 
         self.client.handle_VOLUME_CREATED(message)
         self.assertEquals(share, self.volume)
-
-    def test_handle_volume_created_if_volume_is_buggy(self):
-        """Test handle_VOLUME_CREATED if the volume is buggy."""
-        message = build_volume_created()
-        message.volume_created.type = -1  # invalid type!
-        self.client.set_volume_created_callback(lambda vol: None)
-        self.assertRaises(TypeError, self.client.handle_VOLUME_CREATED,
-                          message)
 
     def test_handle_volume_created_if_callback_is_none(self):
         """Test handle_VOLUME_CREATED if callback is none."""
@@ -456,7 +468,10 @@ class ClientTestCase(unittest.TestCase):
     def test_handle_volume_deleted_passes_the_id(self):
         """Test handle_VOLUME_DELETED."""
         self.volume = None
-        a_callback = lambda vol_id: setattr(self, 'volume', vol_id)
+
+        def a_callback(vol):
+            setattr(self, 'volume', vol)
+
         self.client.set_volume_deleted_callback(a_callback)
 
         message = build_volume_deleted()
@@ -564,12 +579,6 @@ class ListVolumesTestCase(RequestTestCase):
     def test_process_message_error(self):
         """Test request processMessage on error."""
         message = protocol_pb2.Message()
-        self.assertRaises(FakedError, self.request.processMessage, message)
-
-    def test_process_message_error_when_incorrect_volume(self):
-        """Test error condition when incorrect volume type."""
-        message = build_list_volumes()
-        message.list_volumes.type = -1
         self.assertRaises(FakedError, self.request.processMessage, message)
 
     def test_process_message_volume_created(self):

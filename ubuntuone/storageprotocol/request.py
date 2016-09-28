@@ -214,8 +214,7 @@ class RequestHandler(Protocol):
 
         if is_invalid:
             self.log.error("Validation error: " + ", ".join(is_invalid))
-            comment = ("Validation error:\n"
-                       + "\n".join(is_invalid))
+            comment = "Validation error:\n" + "\n".join(is_invalid)
             if len(comment) > MAX_PAYLOAD_SIZE - 100:
                 comment = comment[:MAX_PAYLOAD_SIZE - 112] + ' [truncated]'
             error_message = protocol_pb2.Message()

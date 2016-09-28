@@ -36,6 +36,10 @@ import hashlib
 import zlib
 
 
+def noop():
+    """No op."""
+
+
 class ContentHash(object):
     """Encapsulate the generation of content hashes.
 
@@ -43,7 +47,7 @@ class ContentHash(object):
     composition to get similar methods.
 
     """
-    method = lambda: None
+    method = noop
     method_name = ""
 
     def __init__(self):

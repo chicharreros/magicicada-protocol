@@ -36,12 +36,6 @@ from twisted.web import client, resource, server
 
 from ubuntuone.storageprotocol import context
 
-try:
-    from ubuntu_sso.utils import get_cert_dir
-except ImportError:
-    # old system, let's support Precise
-    get_cert_dir = lambda: '/etc/ssl/certs'
-
 
 class FakeCerts(object):
     """CA and Server certificate."""
@@ -123,24 +117,6 @@ class SSLContextTestCase(unittest.TestCase):
     """Tests for the context.get_ssl_context function."""
 
     @defer.inlineCallbacks
-    def setUp(self):
-        yield super(SSLContextTestCase, self).setUp()
-        self.patch(context, "get_certificates", self.get_certificates)
-
-    def get_certificates(self):
-        """Get the uninstalled certificates, for testing."""
-        certs = []
-        data_dir = get_cert_dir()
-
-        for certname in ['UbuntuOne-Go_Daddy_Class_2_CA.pem',
-                         'UbuntuOne-Go_Daddy_CA.pem']:
-            cert_path = os.path.abspath(os.path.join(data_dir, certname))
-            c = ssl.Certificate.loadPEM(file(cert_path, 'r').read())
-            certs.append(c.original)
-
-        return certs
-
-    @defer.inlineCallbacks
     def verify_context(self, server_context, client_context):
         """Verify a client context with a given server context."""
         site = server.Site(FakeResource())
@@ -177,7 +153,7 @@ class SSLContextTestCase(unittest.TestCase):
 
         d = self.verify_context(server_context, client_context)
         e = yield self.assertFailure(d, SSL.Error)
-        self.assertEqual(e[0][0][1], "SSL3_GET_SERVER_CERTIFICATE")
+        self.assertEqual(e[0][0][1], "ssl3_get_server_certificate")
 
     @defer.inlineCallbacks
     def test_fails_hostname(self):
@@ -191,7 +167,7 @@ class SSLContextTestCase(unittest.TestCase):
 
         d = self.verify_context(server_context, client_context)
         e = yield self.assertFailure(d, SSL.Error)
-        self.assertEqual(e[0][0][1], "SSL3_GET_SERVER_CERTIFICATE")
+        self.assertEqual(e[0][0][1], "ssl3_get_server_certificate")
 
     @defer.inlineCallbacks
     def test_matches_all(self):
@@ -212,7 +188,7 @@ class CertLoadingTestCase(unittest.TestCase):
     def test_load_all_certificates(self):
         """Load all available certificates."""
         certs = FakeCerts(self, "localhost")
-        self.patch(context, 'get_cert_dir', lambda: certs.cert_dir)
+        os.environ['SSL_CERTIFICATES_DIR'] = certs.cert_dir
         # remove the key
         os.unlink(certs.server_key_path)
         loaded = context.get_certificates()

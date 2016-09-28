@@ -1689,8 +1689,8 @@ class ThrottlingStorageClientFactory(StorageClientFactory, object):
         """
         delayed_call = getattr(self, call_id)
         # check if we already have a DelayedCall running
-        if delayed_call is None or (not delayed_call.active()
-                                    and delayed_call.cancelled):
+        if delayed_call is None or (
+                not delayed_call.active() and delayed_call.cancelled):
             return self.callLater(period, func)
         return delayed_call
 
@@ -1837,12 +1837,12 @@ if __name__ == "__main__":
     reactor.connectTCP('localhost', 20100, StorageClientFactory())
 
     # using ssl
-    #reactor.connectSSL('localhost', 20101, StorageClientFactory(),
+    # reactor.connectSSL('localhost', 20101, StorageClientFactory(),
     #           ssl.ClientContextFactory())
 
     # using ssl over a proxy
-    #from ubuntuone.storageprotocol import proxy_tunnel
-    #proxy_tunnel.connectHTTPS('localhost', 3128,
+    # from ubuntuone.storageprotocol import proxy_tunnel
+    # proxy_tunnel.connectHTTPS('localhost', 3128,
     #        'localhost', 20101, StorageClientFactory(),
     #        user="test", passwd="test")
 
