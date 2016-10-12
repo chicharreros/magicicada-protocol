@@ -1229,9 +1229,9 @@ class PutContent(request.Request):
         """Handle messages."""
         if message.type == protocol_pb2.Message.BEGIN_CONTENT:
             # call the upload_id_cb (if the upload_id it's in the message)
-            if message.begin_content.upload_id \
-               and self.upload_id_cb:
-                self.upload_id_cb(message.begin_content.upload_id)
+            if message.begin_content.upload_id and self.upload_id_cb:
+                self.upload_id_cb(message.begin_content.upload_id,
+                                  message.begin_content.offset)
             message_producer = BytesMessageProducer(
                 self, self.fd, message.begin_content.offset)
             self.registerProducer(message_producer, streaming=True)

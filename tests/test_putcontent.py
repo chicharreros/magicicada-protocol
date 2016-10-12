@@ -45,9 +45,14 @@ from mocker import Mocker, ANY
 
 
 class TestOffset(unittest.TestCase):
-    """
-    Tests for BEGIN_CONTENT's offset attribute
-    """
+    """Tests for BEGIN_CONTENT's offset attribute."""
+
+    def setUp(self):
+        super(TestOffset, self).setUp()
+        transport = StringTransport()
+        self.protocol = StorageClient()
+        self.protocol.transport = transport
+
     def test_offset(self):
         """
         Test that, if the server's BEGIN_CONTENT message specifies an offset,
@@ -98,12 +103,28 @@ class TestOffset(unittest.TestCase):
         pc.start()
         pc.processMessage(message)
 
+    def test_callback(self):
+        """Test that, if the server specify an offset, we call back with it."""
+        upload_id = 'foo'
+        offset = 123456
+        called = []
+        pc = PutContent(self.protocol, 'share', 'node', '', '', 0, 0, 0,
+                        StringIO(''), upload_id_cb=lambda *a: called.append(a))
+        message = protocol_pb2.Message()
+        message.type = protocol_pb2.Message.BEGIN_CONTENT
+        message.begin_content.upload_id = upload_id
+        message.begin_content.offset = offset
+        pc.start()
+        pc.processMessage(message)
+        self.assertEqual(len(called), 1)
+        self.assertEqual(called[0], (upload_id, offset))
+
 
 class TestUploadId(unittest.TestCase):
     """Tests for BEGIN_CONTENT and PUT_CONTENT upload_id attribute."""
 
     def setUp(self):
-        unittest.TestCase.setUp(self)
+        super(TestUploadId, self).setUp()
         transport = StringTransport()
         self.protocol = StorageClient()
         self.protocol.transport = transport
@@ -112,15 +133,16 @@ class TestUploadId(unittest.TestCase):
         """Test that, if the server specify an upload_id, we save it."""
         upload_id = "foo"
         called = []
-        pc = PutContent(self.protocol, 'share', 'node', '', '',
-                        0, 0, 0, StringIO(''), upload_id_cb=called.append)
+        pc = PutContent(self.protocol, 'share', 'node', '', '', 0, 0, 0,
+                        StringIO(''), upload_id_cb=lambda *a: called.append(a))
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.BEGIN_CONTENT
         message.begin_content.upload_id = upload_id
+        message.begin_content.offset = 0
         pc.start()
         pc.processMessage(message)
         self.assertEqual(len(called), 1)
-        self.assertEqual(called[0], 'foo')
+        self.assertEqual(called[0], ('foo', 0))
 
     def test_server_upload_id_no_cb(self):
         """Test that, if the server specify an upload_id, we save it.
