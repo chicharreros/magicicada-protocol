@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2009-2015 Canonical Ltd.
+
+# Copyright 2009-2015 Canonical Ltd.
+# Copyright 2016 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -26,6 +27,7 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
+
 """Tests for the protocol client."""
 
 import StringIO
@@ -42,8 +44,20 @@ from twisted.web import server, resource
 
 from ubuntuone.storageprotocol import protocol_pb2, sharersp, delta, request
 from ubuntuone.storageprotocol.client import (
-    StorageClient, CreateUDF, ListVolumes, DeleteVolume, GetDelta, Unlink,
-    Authenticate, MakeFile, MakeDir, PutContent, Move, BytesMessageProducer,
+    Authenticate,
+    BytesMessageProducer,
+    ChangePublicAccess,
+    CreateUDF,
+    DeleteVolume,
+    GetDelta,
+    ListPublicFiles,
+    ListVolumes,
+    MakeDir,
+    MakeFile,
+    Move,
+    PutContent,
+    StorageClient,
+    Unlink,
 )
 
 from ubuntuone.storageprotocol import volumes
@@ -61,6 +75,7 @@ SHARE = uuid.UUID('33333333-1234-1234-1234-123456789abc')
 NODE = uuid.UUID('FEDCBA98-7654-3211-2345-6789ABCDEF12')
 USER = u'Dude'
 GENERATION = 999
+PUBLIC_URL = "http://magicicada/someid"
 
 
 class FakedError(Exception):
@@ -308,7 +323,7 @@ class ClientTestCase(unittest.TestCase):
         self.client.set_share_change_callback(a_callback)
         self.assertTrue(self.client._share_change_callback is a_callback)
         self.client.handle_NOTIFY_SHARE(proto_msg)
-        self.assertEquals(self.share_notif.share_id, share_resp.share_id)
+        self.assertEqual(self.share_notif.share_id, share_resp.share_id)
 
     def test_share_delete_callback(self):
         """Test share_delete callback usage."""
@@ -329,7 +344,7 @@ class ClientTestCase(unittest.TestCase):
         self.client.set_share_delete_callback(a_callback)
         self.assertTrue(self.client._share_delete_callback is a_callback)
         self.client.handle_SHARE_DELETED(proto_msg)
-        self.assertEquals(self.deleted_share_id, share_id)
+        self.assertEqual(self.deleted_share_id, share_id)
 
     def test_share_answer_callback(self):
         """Test share_answer callback usage."""
@@ -351,8 +366,8 @@ class ClientTestCase(unittest.TestCase):
         self.client.set_share_answer_callback(a_callback)
         self.assertTrue(self.client._share_answer_callback is a_callback)
         self.client.handle_SHARE_ACCEPTED(proto_msg)
-        self.assertEquals(self.answer[0], share_id)
-        self.assertEquals(self.answer[1], "Yes")
+        self.assertEqual(self.answer[0], share_id)
+        self.assertEqual(self.answer[1], "Yes")
 
     def test_handle_volume_new_generation_uuid(self):
         """Test handle_VOLUME_NEW_GENERATION with an uuid id."""
@@ -415,7 +430,7 @@ class ClientTestCase(unittest.TestCase):
         root = volumes.RootVolume.from_msg(message.volume_created.root)
 
         self.client.handle_VOLUME_CREATED(message)
-        self.assertEquals(root, self.volume)
+        self.assertEqual(root, self.volume)
 
     def test_handle_udf_created_passes_a_udf(self):
         """Test handle_VOLUME_CREATED parameter passing."""
@@ -431,7 +446,7 @@ class ClientTestCase(unittest.TestCase):
         udf = volumes.UDFVolume.from_msg(message.volume_created.udf)
 
         self.client.handle_VOLUME_CREATED(message)
-        self.assertEquals(udf, self.volume)
+        self.assertEqual(udf, self.volume)
 
     def test_handle_share_created_passes_a_share(self):
         """Test handle_VOLUME_CREATED parameter passing."""
@@ -447,7 +462,7 @@ class ClientTestCase(unittest.TestCase):
         share = volumes.ShareVolume.from_msg(message.volume_created.share)
 
         self.client.handle_VOLUME_CREATED(message)
-        self.assertEquals(share, self.volume)
+        self.assertEqual(share, self.volume)
 
     def test_handle_volume_created_if_callback_is_none(self):
         """Test handle_VOLUME_CREATED if callback is none."""
@@ -478,7 +493,7 @@ class ClientTestCase(unittest.TestCase):
         message.volume_deleted.volume = str(VOLUME)
         self.client.handle_VOLUME_DELETED(message)
 
-        self.assertEquals(VOLUME, self.volume)
+        self.assertEqual(VOLUME, self.volume)
 
     def test_handle_volume_deleted_if_none(self):
         """Test handle_VOLUME_DELETED if callback is none."""
@@ -515,8 +530,8 @@ class CreateUDFTestCase(RequestTestCase):
 
     def test_init(self):
         """Test request creation."""
-        self.assertEquals(PATH, self.request.path)
-        self.assertEquals(NAME, self.request.name)
+        self.assertEqual(PATH, self.request.path)
+        self.assertEqual(NAME, self.request.name)
         self.assertTrue(self.request.volume_id is None)
         self.assertTrue(self.request.node_id is None)
 
@@ -524,11 +539,11 @@ class CreateUDFTestCase(RequestTestCase):
         """Test request start."""
         self.request.start()
 
-        self.assertEquals(1, len(self.request.protocol.messages))
+        self.assertEqual(1, len(self.request.protocol.messages))
         actual_msg, = self.request.protocol.messages
-        self.assertEquals(protocol_pb2.Message.CREATE_UDF, actual_msg.type)
-        self.assertEquals(self.request.path, actual_msg.create_udf.path)
-        self.assertEquals(self.request.name, actual_msg.create_udf.name)
+        self.assertEqual(protocol_pb2.Message.CREATE_UDF, actual_msg.type)
+        self.assertEqual(self.request.path, actual_msg.create_udf.path)
+        self.assertEqual(self.request.name, actual_msg.create_udf.name)
 
     def test_process_message_error(self):
         """Test request processMessage on error."""
@@ -544,8 +559,8 @@ class CreateUDFTestCase(RequestTestCase):
         message.volume_created.udf.node = str(NODE)
         self.request.processMessage(message)
 
-        self.assertEquals(str(VOLUME), self.request.volume_id, 'volume set')
-        self.assertEquals(str(NODE), self.request.node_id, 'node set')
+        self.assertEqual(str(VOLUME), self.request.volume_id, 'volume set')
+        self.assertEqual(str(NODE), self.request.node_id, 'node set')
         self.assertTrue(self.done_called, 'done() was called')
 
 
@@ -566,15 +581,15 @@ class ListVolumesTestCase(RequestTestCase):
 
     def test_init(self):
         """Test request creation."""
-        self.assertEquals([], self.request.volumes)
+        self.assertEqual([], self.request.volumes)
 
     def test_start(self):
         """Test request start."""
         self.request.start()
 
-        self.assertEquals(1, len(self.request.protocol.messages))
+        self.assertEqual(1, len(self.request.protocol.messages))
         actual_msg, = self.request.protocol.messages
-        self.assertEquals(protocol_pb2.Message.LIST_VOLUMES, actual_msg.type)
+        self.assertEqual(protocol_pb2.Message.LIST_VOLUMES, actual_msg.type)
 
     def test_process_message_error(self):
         """Test request processMessage on error."""
@@ -598,10 +613,9 @@ class ListVolumesTestCase(RequestTestCase):
         root = volumes.RootVolume.from_msg(message.list_volumes.root)
         self.request.processMessage(message)
 
-        self.assertEquals(3, len(self.request.volumes),
-                          '3 volumes stored')
-        self.assertEquals([udf, share, root], self.request.volumes,
-                          'volumes stored')
+        self.assertEqual(3, len(self.request.volumes), '3 volumes stored')
+        self.assertEqual([udf, share, root], self.request.volumes,
+                         'volumes stored')
 
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.VOLUMES_END
@@ -622,7 +636,7 @@ class ListVolumesTestCase(RequestTestCase):
         self.request.processMessage(message)
 
         self.request.start()
-        self.assertEquals([], self.request.volumes)
+        self.assertEqual([], self.request.volumes)
 
 
 class DeleteVolumeTestCase(RequestTestCase):
@@ -642,17 +656,17 @@ class DeleteVolumeTestCase(RequestTestCase):
 
     def test_init(self):
         """Test request creation."""
-        self.assertEquals(str(VOLUME), self.request.volume_id)
+        self.assertEqual(str(VOLUME), self.request.volume_id)
 
     def test_start(self):
         """Test request start."""
         self.request.start()
 
-        self.assertEquals(1, len(self.request.protocol.messages))
+        self.assertEqual(1, len(self.request.protocol.messages))
         actual_msg, = self.request.protocol.messages
-        self.assertEquals(protocol_pb2.Message.DELETE_VOLUME, actual_msg.type)
-        self.assertEquals(self.request.volume_id,
-                          actual_msg.delete_volume.volume)
+        self.assertEqual(protocol_pb2.Message.DELETE_VOLUME, actual_msg.type)
+        self.assertEqual(self.request.volume_id,
+                         actual_msg.delete_volume.volume)
 
     def test_process_message_error(self):
         """Test request processMessage on error."""
@@ -685,17 +699,17 @@ class GetDeltaTestCase(RequestTestCase):
 
     def test_init(self):
         """Test request creation."""
-        self.assertEquals(str(SHARE), self.request.share_id)
+        self.assertEqual(str(SHARE), self.request.share_id)
 
     def test_start(self):
         """Test request start."""
         self.request.start()
 
-        self.assertEquals(1, len(self.request.protocol.messages))
+        self.assertEqual(1, len(self.request.protocol.messages))
         actual_msg, = self.request.protocol.messages
-        self.assertEquals(protocol_pb2.Message.GET_DELTA, actual_msg.type)
-        self.assertEquals(self.request.share_id,
-                          actual_msg.get_delta.share)
+        self.assertEqual(protocol_pb2.Message.GET_DELTA, actual_msg.type)
+        self.assertEqual(self.request.share_id,
+                         actual_msg.get_delta.share)
 
     def test_process_message_error(self):
         """Test request processMessage on error."""
@@ -712,11 +726,11 @@ class GetDeltaTestCase(RequestTestCase):
         self.request.processMessage(message)
 
         self.assertTrue(self.done_called, 'done() was called')
-        self.assertEquals(self.request.end_generation,
-                          message.delta_end.generation)
-        self.assertEquals(self.request.full, message.delta_end.full)
-        self.assertEquals(self.request.free_bytes,
-                          message.delta_end.free_bytes)
+        self.assertEqual(self.request.end_generation,
+                         message.delta_end.generation)
+        self.assertEqual(self.request.full, message.delta_end.full)
+        self.assertEqual(self.request.free_bytes,
+                         message.delta_end.free_bytes)
 
     def test_process_message_content(self):
         """Test request processMessage for content."""
@@ -748,11 +762,11 @@ class GetDeltaTestCase(RequestTestCase):
         self.request.done = was_called(self, 'done_called')
         self.request.start()
 
-        self.assertEquals(1, len(self.request.protocol.messages))
+        self.assertEqual(1, len(self.request.protocol.messages))
         actual_msg, = self.request.protocol.messages
-        self.assertEquals(protocol_pb2.Message.GET_DELTA, actual_msg.type)
-        self.assertEquals(self.request.share_id,
-                          actual_msg.get_delta.share)
+        self.assertEqual(protocol_pb2.Message.GET_DELTA, actual_msg.type)
+        self.assertEqual(self.request.share_id,
+                         actual_msg.get_delta.share)
 
 
 class TestAuth(RequestTestCase):
@@ -958,5 +972,124 @@ class PutContentTestCase(RequestTestCase):
         return d
 
 
-if __name__ == '__main__':
-    unittest.main()
+class ChangePublicAccessTestCase(RequestTestCase):
+    """Test cases for ChangePublicAccess op."""
+
+    request_class = ChangePublicAccess
+
+    @defer.inlineCallbacks
+    def setUp(self):
+        """Initialize testing protocol."""
+        yield super(ChangePublicAccessTestCase, self).setUp()
+        self.protocol = FakedProtocol()
+        self.request = self.request_class(
+            self.protocol, share_id=SHARE, node_id=NODE, is_public=True)
+        self.request.error = faked_error
+        self.done_called = False
+        self.request.done = was_called(self, 'done_called')
+
+    def test_init(self):
+        """Test request creation."""
+        self.assertEqual(self.request.share_id, str(SHARE))
+        self.assertEqual(self.request.node_id, str(NODE))
+        self.assertTrue(self.request.is_public)
+
+    def test_start(self):
+        """Test request start."""
+        self.request.start()
+
+        self.assertEqual(1, len(self.request.protocol.messages))
+        actual_msg, = self.request.protocol.messages
+        self.assertEqual(actual_msg.type,
+                         protocol_pb2.Message.CHANGE_PUBLIC_ACCESS)
+        self.assertEqual(actual_msg.change_public_access.share,
+                         self.request.share_id)
+        self.assertEqual(actual_msg.change_public_access.node,
+                         self.request.node_id)
+        self.assertTrue(actual_msg.change_public_access.is_public)
+
+    def test_process_message_error(self):
+        """Test request processMessage on error."""
+        message = protocol_pb2.Message()
+        self.assertRaises(FakedError, self.request.processMessage, message)
+        self.assertIsNone(self.request.public_url)
+
+    def test_process_message_ok(self):
+        """Test request processMessage on sucess."""
+        message = protocol_pb2.Message()
+        message.type = protocol_pb2.Message.OK
+        message.public_url = PUBLIC_URL
+        self.request.processMessage(message)
+
+        self.assertTrue(self.done_called, 'done() was called')
+        self.assertIsNotNone(self.request.public_url)
+
+
+class ListPublicFilesTestCase(RequestTestCase):
+    """Test cases for ListPublicFiles op."""
+
+    request_class = ListPublicFiles
+
+    @defer.inlineCallbacks
+    def setUp(self):
+        """Initialize testing protocol."""
+        yield super(ListPublicFilesTestCase, self).setUp()
+        self.protocol = FakedProtocol()
+        self.request = self.request_class(self.protocol)
+        self.request.error = faked_error
+        self.done_called = False
+        self.request.done = was_called(self, 'done_called')
+
+    def test_start(self):
+        """Test request start."""
+        self.request.start()
+
+        self.assertEqual(1, len(self.request.protocol.messages))
+        actual_msg, = self.request.protocol.messages
+        self.assertEqual(actual_msg.type,
+                         protocol_pb2.Message.LIST_PUBLIC_FILES)
+
+    def test_process_message_error(self):
+        """Test request processMessage on error."""
+        message = protocol_pb2.Message()
+        self.assertRaises(FakedError, self.request.processMessage, message)
+        self.assertEqual(self.request.public_files, [])
+
+    def test_process_message_ok(self):
+        """Test request processMessage on sucess."""
+        # send two nodes
+        message = protocol_pb2.Message()
+        message.type = protocol_pb2.Message.PUBLIC_FILE_INFO
+        message.public_file_info.share = 'share_id'
+        message.public_file_info.node = 'node_id_1'
+        message.public_file_info.is_public = True
+        message.public_file_info.public_url = "test url 123"
+        self.request.processMessage(message)
+
+        message = protocol_pb2.Message()
+        message.type = protocol_pb2.Message.PUBLIC_FILE_INFO
+        message.public_file_info.share = 'share_id'
+        message.public_file_info.node = 'node_id_2'
+        message.public_file_info.is_public = True
+        message.public_file_info.public_url = "test url 456"
+        self.request.processMessage(message)
+
+        # finish
+        message = protocol_pb2.Message()
+        message.type = protocol_pb2.Message.PUBLIC_FILE_INFO_END
+        self.request.processMessage(message)
+
+        # check
+        self.assertTrue(self.done_called, 'done() was called')
+        node1, node2 = self.request.public_files
+        print("NNNNNNNNNNNNO 1", node1)
+
+        self.assertEqual(node1.share_id, 'share_id')
+        self.assertEqual(node1.node_id, 'node_id_1')
+        self.assertEqual(node1.is_public, True)
+        self.assertEqual(node1.public_url, 'test url 123')
+
+        self.assertEqual(node2.share_id, 'share_id')
+        self.assertEqual(node2.node_id, 'node_id_2')
+        self.assertEqual(node2.is_public, True)
+        self.assertEqual(node2.public_url, 'test url 456')

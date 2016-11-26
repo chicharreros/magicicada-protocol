@@ -1,12 +1,5 @@
-# ubuntuone.storageprotocol.client - the storage protocol client
-#
-# Author: Lucio Torre <lucio.torre@canonical.com>
-# Author: Natalia B. Bidart <natalia.bidart@canonical.com>
-# Author: Guillermo Gonzalez <guillermo.gonzalez@canonical.com>
-# Author: Facundo Batista <facundo@canonical.com>
-# Author: Alejandro J. Cura <alecu@canonical.com>
-#
 # Copyright 2009-2015 Canonical Ltd.
+# Copyright 2016 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -32,6 +25,7 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
+
 """The storage protocol client."""
 
 import logging
@@ -47,6 +41,7 @@ from twisted.python import log
 from ubuntuone.storageprotocol import (
     delta,
     protocol_pb2,
+    public_file_info,
     request,
     sharersp,
     volumes,
@@ -538,6 +533,18 @@ class StorageClient(request.RequestHandler):
         p.start()
         return p.deferred
 
+    def change_public_access(self, share_id, node_id, is_public):
+        """Change the public access of a file."""
+        p = ChangePublicAccess(self, share_id, node_id, is_public)
+        p.start()
+        return p.deferred
+
+    def list_public_files(self):
+        """List the public files."""
+        p = ListPublicFiles(self)
+        p.start()
+        return p.deferred
+
     def delete_volume(self, volume_id):
         """Delete 'volume' on the server, removing the associated tree.
 
@@ -956,6 +963,62 @@ class Unlink(request.Request):
     def processMessage(self, message):
         if message.type == protocol_pb2.Message.OK:
             self.new_generation = message.new_generation
+            self.done()
+        else:
+            self._default_process_message(message)
+
+
+class ChangePublicAccess(request.Request):
+    """Change the public access of a file."""
+
+    __slots__ = ('share_id', 'node_id', 'is_public', 'public_url')
+
+    def __init__(self, protocol, share_id, node_id, is_public):
+        request.Request.__init__(self, protocol)
+        self.public_url = None
+
+        self.share_id = str(share_id)
+        self.node_id = str(node_id)
+        self.is_public = is_public
+
+    def _start(self):
+        message = protocol_pb2.Message()
+        message.type = protocol_pb2.Message.CHANGE_PUBLIC_ACCESS
+        message.change_public_access.share = self.share_id
+        message.change_public_access.node = self.node_id
+        message.change_public_access.is_public = self.is_public
+        self.sendMessage(message)
+
+    def processMessage(self, message):
+        if message.type == protocol_pb2.Message.OK:
+            self.public_url = message.public_url
+            self.done()
+        else:
+            self._default_process_message(message)
+
+
+class ListPublicFiles(request.Request):
+    """List all the public files for an user."""
+
+    __slots__ = ('public_files',)
+
+    def __init__(self, protocol):
+        """List volumes."""
+        request.Request.__init__(self, protocol)
+        self.public_files = []
+
+    def _start(self):
+        """Send the LIST_PUBLIC_FILES message to the server."""
+        message = protocol_pb2.Message()
+        message.type = protocol_pb2.Message.LIST_PUBLIC_FILES
+        self.sendMessage(message)
+
+    def processMessage(self, message):
+        """Process the answer from the server."""
+        if message.type == protocol_pb2.Message.PUBLIC_FILE_INFO:
+            info = public_file_info.PublicFileInfo.from_message(message)
+            self.public_files.append(info)
+        elif message.type == protocol_pb2.Message.PUBLIC_FILE_INFO_END:
             self.done()
         else:
             self._default_process_message(message)

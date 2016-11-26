@@ -1,7 +1,6 @@
 /*
- ubuntuone.storageprotocol.protocol_pb2 - storage protocol
-
  Copyright 2009-2012 Canonical Ltd.
+ Copyright 2016 Chicharreros (https://launchpad.net/~chicharreros)
 
  This program is free software: you can redistribute it and/or modify it
  under the terms of the GNU Affero General Public License version 3,
@@ -97,6 +96,11 @@ message Message {
         GET_DELTA = 51;          // ask for a delta
         DELTA_INFO = 52;         // a row of the delta
         DELTA_END = 53;          // marks the end of a delta
+
+        CHANGE_PUBLIC_ACCESS = 55;  // change the public access of a file
+        PUBLIC_FILE_INFO = 56;  // information for a public file
+        PUBLIC_FILE_INFO_END = 57;  // marks the end of a bunch of public file infos
+        LIST_PUBLIC_FILES = 58;  // get the list of public files for the user
     }
 
     required MessageType type = 2; // The type of the message contained
@@ -159,6 +163,11 @@ message Message {
     optional GetDelta get_delta = 38;
     optional DeltaInfo delta_info = 39;
     optional DeltaEnd delta_end = 40;
+
+    // public files
+    optional ChangePublicAccess change_public_access = 45;
+    optional bytes public_url = 46;
+    optional PublicFileInfo public_file_info = 47;
 }
 
 message Error {
@@ -479,6 +488,19 @@ message DeltaEnd {
     optional uint64 generation = 1;
     optional bool full = 2; // full delta means nothing is pending
     optional uint64 free_bytes = 3; // this will be just a hint if full == False
+}
+
+message ChangePublicAccess {
+    optional bytes share = 1;
+    optional bytes node = 2;
+    optional bool is_public = 3;
+}
+
+message PublicFileInfo {
+    optional bytes share = 1;
+    optional bytes node = 2;
+    optional bool is_public = 3;
+    optional bytes public_url = 4;
 }
 
 /*
