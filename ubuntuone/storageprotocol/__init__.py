@@ -1,6 +1,5 @@
-# __init__.py
-#
 # Copyright 2009-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -26,4 +25,5 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
+
 """ubuntuone.storageprotocol package."""

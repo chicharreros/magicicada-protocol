@@ -1,10 +1,7 @@
-# ubuntuone.storageprotocol.sharersp.py -
-#           provides a handy class to use Shares
-#
-# Author: Facundo Batista <facundo@canonical.com>
-#         Guillermo Gonzalez <guillermo.gonzalez@canonical.com>
+# -*- coding: utf-8 -*-
 #
 # Copyright 2009-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -30,13 +27,12 @@
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 """A handy class to use Shares."""
 
 import uuid
 
 from ubuntuone.storageprotocol import volumes
-# Disable this warning, as we define several things outside __init__ here
-# pylint: disable=W0201
 
 
 class ShareResponse(object):

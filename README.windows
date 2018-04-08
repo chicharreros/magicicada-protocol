@@ -1,8 +1,0 @@
-installation steps
-
-- install protoc
-- download protobuf and "python setup.py install" in protobuf\python
-- easy_install pyopenssl
-- easy_install bzr
-- install twisted
-- install

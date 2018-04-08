@@ -1,8 +1,7 @@
-# ubuntuone.storageprotocol.proxy_tunnel - tunnel through proxies
-#
-# Author: Lucio Torre <lucio.torre@canonical.com>
+# -*- coding: utf-8 -*-
 #
 # Copyright 2009-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -28,7 +27,9 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
-"""Proxy tunelling"""
+
+"""Proxy tunelling."""
+
 import base64
 
 from twisted.internet.protocol import Protocol, ClientFactory, connectionDone
@@ -70,9 +71,8 @@ class ProxyTunnelClient(Protocol):
         self.client_protocol = None
         self.__buffer = ""
         # send request
-        line = "CONNECT %s:%s HTTP/1.0\r\n" % \
-                (self.factory.host, self.factory.port)
-        self.transport.write(line)
+        line = "CONNECT %s:%s HTTP/1.0\r\n"
+        self.transport.write(line % (self.factory.host, self.factory.port))
         # send headers
         self.sendHeader("Host", self.factory.host)
         # do auth
@@ -112,7 +112,6 @@ class ProxyTunnelClient(Protocol):
         """Received a line."""
         if line:
             parts = line.split(" ", 2)
-            # pylint: disable=W0612
             version, status = parts[:2]
             if len(parts) == 3:
                 message = parts[2]
@@ -150,8 +149,8 @@ class ProxyTunnelFactory(ClientFactory):
 
     def clientConnectionFailed(self, connector, reason):
         """Proxy client connection failed."""
-        self.factory.clientConnectionFailed(connector,
-            "Proxy connection error: %s" % (str(reason)))
+        self.factory.clientConnectionFailed(
+            connector, "Proxy connection error: %s" % (str(reason)))
 
 
 def connectHTTPS(proxy_host, proxy_port, host, port, factory,

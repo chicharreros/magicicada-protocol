@@ -1,8 +1,5 @@
-# ubuntuone.storageprotocol.samples.easy_client - a simple client
-#
-# Author: Lucio Torre <lucio.torre@canonical.com>
-#
 # Copyright 2009-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -28,8 +25,9 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
-"""A simple client with some tests
-"""
+
+"""A simple client with some tests."""
+
 import os
 import time
 import math
@@ -41,8 +39,8 @@ from twisted.internet import reactor, defer
 from ubuntuone.storageprotocol.client import (
     StorageClientFactory, StorageClient)
 from ubuntuone.storageprotocol import request, protocol_pb2
-from ubuntuone.storageprotocol.dircontent_pb2 import \
-    DirectoryContent, DIRECTORY
+from ubuntuone.storageprotocol.dircontent_pb2 import (
+    DirectoryContent, DIRECTORY)
 
 
 class NotDirectory(Exception):
@@ -51,8 +49,7 @@ class NotDirectory(Exception):
 
 def delay_time(step):
     """generates a delay for each step"""
-    return (((math.exp(step) - 1) / 10) /
-            (1 + random.random()))
+    return ((math.exp(step) - 1) / 10) / (1 + random.random())
 
 
 def retry(function):
@@ -91,7 +88,6 @@ class EasyClient(StorageClient):
 
     def connectionMade(self):
         """Setup and call callback."""
-        # pylint: disable=W0201
         StorageClient.connectionMade(self)
         self.factory.clientConnectionMade(self)
 
@@ -158,15 +154,15 @@ class EasyClient(StorageClient):
     def mkfile(self, name):
         """make a file named name in cwd."""
         d = self.get_cwd_id()
-        d.addCallback(lambda _:
-            self.make_file(request.ROOT, self.cwd_id, name))
+        d.addCallback(
+            lambda _: self.make_file(request.ROOT, self.cwd_id, name))
         return d
 
     def mkdir(self, name):
         """make a dir named name in cwd."""
         d = self.get_cwd_id()
-        d.addCallback(lambda _:
-            self.make_dir(request.ROOT, self.cwd_id, name))
+        d.addCallback(
+            lambda _: self.make_dir(request.ROOT, self.cwd_id, name))
         return d
 
     def put(self, name, content):

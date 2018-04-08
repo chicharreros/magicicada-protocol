@@ -1,8 +1,7 @@
-# ubuntuone.storageprotocol.delta - delta nodes wrappers
-#
-# Author: Lucio Torre <lucio.torre@canonical.com>
+# -*- coding: utf-8 -*-
 #
 # Copyright 2009-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -28,18 +27,18 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
-"""
-Provides wrapper classes for delta nodes messages
-"""
+
+"""Provides wrapper classes for delta nodes messages."""
 
 from ubuntuone.storageprotocol import protocol_pb2
 
 FILE = 0
 DIRECTORY = 1
 
-file_type_registry = {protocol_pb2.FileInfo.FILE: FILE,
-                      protocol_pb2.FileInfo.DIRECTORY: DIRECTORY,
-                      }
+file_type_registry = {
+    protocol_pb2.FileInfo.FILE: FILE,
+    protocol_pb2.FileInfo.DIRECTORY: DIRECTORY,
+}
 
 
 class FileInfoDelta(object):
