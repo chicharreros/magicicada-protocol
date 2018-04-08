@@ -4,7 +4,7 @@ ADD . /home/ubuntu/magicicada
 COPY . /home/ubuntu/magicicada
 WORKDIR /home/ubuntu/magicicada
 
-RUN apt update && apt install make gcc python python-dev virtualenv -y --no-install-recommends
+RUN apt update && apt install make gcc python python-dev virtualenv protobuf-compiler -y --no-install-recommends
 RUN make bootstrap
 
 RUN useradd -ms /bin/bash ubuntu
