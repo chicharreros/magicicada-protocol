@@ -39,7 +39,7 @@ $(ENV)/bin/activate: requirements.txt requirements-devel.txt
 
 bootstrap: build
 
-build: clean $(ENV)
+build: $(ENV)
 	$(PYTHON) setup.py build
 
 bdist: build
