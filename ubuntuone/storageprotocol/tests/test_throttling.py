@@ -1,9 +1,7 @@
-# ubuntuone.storageprotocol.tests.test_throttling -
-#     Throttling tests
-#
-# Author: Facundo Batista <facundo@canonical.com>
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2009-2012 Canonical
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -29,6 +27,7 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
+
 """Tests for directory content serialization/unserialization."""
 
 from __future__ import with_statement
@@ -232,8 +231,6 @@ class TestLimitValuesInitialization(BaseThrottlingTestCase):
 
     def test_change_to_inavlid(self):
         """Test setting invalid limit values after initialization."""
-        # yes, this is a unittest, I need to access protected members
-        # pylint: disable=W0212
         tscf = self.create_factory(True, 2, 2)
         self.assertRaises(ValueError, tscf._set_read_limit, -1)
         self.assertRaises(ValueError, tscf._set_write_limit, -1)
@@ -458,8 +455,8 @@ class TestEnablement(BaseThrottlingTestCase):
         self.assertEquals(None, tscf.resetReadThisSecondID)
         self.assertEquals(None, tscf.resetWriteThisSecondID)
         tscf.enable_throttling()
-        self.assertTrue(tscf.throttling_enabled,
-                         "Throttling should be enabled.")
+        self.assertTrue(
+            tscf.throttling_enabled, "Throttling should be enabled.")
         self.assertNotEquals(None, tscf.resetReadThisSecondID)
         self.assertNotEquals(None, tscf.resetWriteThisSecondID)
         tscf.registerRead(3)

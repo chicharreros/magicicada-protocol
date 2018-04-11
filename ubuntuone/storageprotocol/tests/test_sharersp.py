@@ -1,8 +1,7 @@
-# ubuntuone.storageprotocol.tests.test_sharersp
-#
-# Author: Guillermo Gonzalez <guillermo.gonzalez@canonical.com>
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2010-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -28,6 +27,7 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
+
 """Tests for shares response."""
 
 import uuid
@@ -66,7 +66,7 @@ class ShareResponseFromParamsTest(TestCase):
     def test_to_me(self):
         """Test ShareResponse.from_params with a 'to_me' share."""
         args = (uuid.uuid4(), "to_me", uuid.uuid4(), "share_name", u"username",
-            u"visible_name", True, self.access_level)
+                u"visible_name", True, self.access_level)
         share = ShareResponse.from_params(*args)
         self.assertShareResponse(share, args)
 
@@ -116,7 +116,7 @@ class ShareResponseFromToMsgTest(TestCase):
     def test_to_me(self):
         """Test ShareResponse.from_params with a 'to_me' share."""
         args = (uuid.uuid4(), "to_me", uuid.uuid4(), "share_name", u"username",
-            u"visible_name", True, self.access_level)
+                u"visible_name", True, self.access_level)
         share = ShareResponse.from_params(*args)
         share.dump_to_msg(self.msg.shares)
         self.assertEqualShare(share,

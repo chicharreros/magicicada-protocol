@@ -1,6 +1,7 @@
-# tests.test_context - test ssl context creation
+# -*- coding: utf-8 -*-
 #
 # Copyright 2012-2015 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -87,7 +88,7 @@ class FakeCerts(object):
         request = crypto.X509Req()
         request.get_subject().CN = common_name
         request.set_pubkey(key)
-        request.sign(key, "md5")
+        request.sign(key, "sha256")
         return request
 
     def _build_cert(self, request, ca_cert, ca_key):
@@ -99,7 +100,7 @@ class FakeCerts(object):
         certificate.set_pubkey(request.get_pubkey())
         certificate.gmtime_adj_notBefore(0)
         certificate.gmtime_adj_notAfter(3600)  # valid for one hour
-        certificate.sign(ca_key, "md5")
+        certificate.sign(ca_key, "sha256")
         return certificate
 
 
@@ -127,6 +128,15 @@ class SSLContextTestCase(unittest.TestCase):
         self.assertEqual(result, "ok")
 
     @defer.inlineCallbacks
+    def assert_cert_failed_verify(self, server_context, client_context):
+        d = self.verify_context(server_context, client_context)
+        e = yield self.assertFailure(d, SSL.Error)
+        self.assertEqual(len(e.message), 1)
+        expected = ('SSL routines', 'tls_process_server_certificate',
+                    'certificate verify failed')
+        self.assertEqual(e.message[0], expected)
+
+    @defer.inlineCallbacks
     def test_no_verify(self):
         """Test the no_verify option."""
         certs = FakeCerts(self, "localhost")
@@ -151,9 +161,7 @@ class SSLContextTestCase(unittest.TestCase):
         client_context = context.get_ssl_context(no_verify=False,
                                                  hostname="localhost")
 
-        d = self.verify_context(server_context, client_context)
-        e = yield self.assertFailure(d, SSL.Error)
-        self.assertEqual(e[0][0][1], "ssl3_get_server_certificate")
+        yield self.assert_cert_failed_verify(server_context, client_context)
 
     @defer.inlineCallbacks
     def test_fails_hostname(self):
@@ -164,10 +172,7 @@ class SSLContextTestCase(unittest.TestCase):
         self.patch(context, "get_certificates", lambda: [certs.ca_cert])
         client_context = context.get_ssl_context(no_verify=False,
                                                  hostname="localhost")
-
-        d = self.verify_context(server_context, client_context)
-        e = yield self.assertFailure(d, SSL.Error)
-        self.assertEqual(e[0][0][1], "ssl3_get_server_certificate")
+        yield self.assert_cert_failed_verify(server_context, client_context)
 
     @defer.inlineCallbacks
     def test_matches_all(self):

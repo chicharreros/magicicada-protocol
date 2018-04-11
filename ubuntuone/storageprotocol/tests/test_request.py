@@ -1,10 +1,7 @@
-# ubuntuone.storageprotocol.tests.test_request -
-#     request class tests
-#
-# Author: Tim Cole <tim.cole@canonical.com>
-# Author: Natalia Bidart <natalia.bidart@canonical.com>
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2009-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -30,6 +27,7 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
+
 """Tests for directory content serialization/unserialization."""
 
 from __future__ import with_statement
@@ -43,9 +41,6 @@ from twisted.trial.unittest import TestCase as TwistedTestCase
 from ubuntuone.storageprotocol import errors, protocol_pb2
 from ubuntuone.storageprotocol.request import (
     RequestHandler, Request, RequestResponse)
-
-# let's not get picky about attributes outside __init__ in tests
-# pylint: disable=W0201
 
 
 class MindlessRequest(Request):
@@ -118,7 +113,7 @@ class TestRequest(TwistedTestCase):
         message = protocol_pb2.Message()
         self.request._default_process_message(message)
 
-        self.assertTrue(isinstance(self.error, errors.StorageRequestError))
+        self.assertIsInstance(self.error, errors.StorageRequestError)
         self.assertEqual(self.request, self.error.request)
         self.assertEqual(message, self.error.error_message)
 
@@ -145,8 +140,7 @@ class TestRequest(TwistedTestCase):
             message.error.type = code_error
             self.request._default_process_message(message)
 
-            self.assertTrue(isinstance(self.error, proto_error),
-                            "must be an instance of %r" % proto_error)
+            self.assertIsInstance(self.error, proto_error)
             self.assertEqual(self.request, self.error.request)
             self.assertEqual(message, self.error.error_message)
 

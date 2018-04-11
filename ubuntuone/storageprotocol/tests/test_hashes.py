@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# Author: Facundo Batista <facundo@canonical.com>
-#
 # Copyright (C) 2011-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -28,6 +27,7 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
+
 """Tests for the protocol hashing methods."""
 
 import hashlib
@@ -42,11 +42,6 @@ from ubuntuone.storageprotocol.content_hash import (
     magic_hash_factory,
 )
 
-# let's not get picky about aatributes outside __init__ in tests
-# pylint: disable=W0201
-# it's ok to access internals in the test suite
-# pylint: disable=W0212
-
 
 class FactoriesTest(unittest.TestCase):
     """Test the hasher factories."""
@@ -54,7 +49,7 @@ class FactoriesTest(unittest.TestCase):
     def test_content_hash_factory(self):
         """Check the factory for the normal content hash."""
         o = content_hash_factory()
-        self.assertTrue(isinstance(o, SHA1ContentHash))
+        self.assertIsInstance(o, SHA1ContentHash)
 
     def test_content_hash_method(self):
         """Test the method that the normal content hash uses."""
@@ -67,7 +62,7 @@ class FactoriesTest(unittest.TestCase):
     def test_magic_hash_factory(self):
         """Check the factory for the magic content hash."""
         o = magic_hash_factory()
-        self.assertTrue(isinstance(o, MagicContentHash))
+        self.assertIsInstance(o, MagicContentHash)
 
     def test_magic_hash_method(self):
         """Test the method that the magic content hash uses."""
@@ -176,7 +171,3 @@ class MagicHashingTests(unittest.TestCase):
         # the value
         ch = self.hasher.content_hash()
         self.assertRaises(NotImplementedError, pickle.dumps, ch)
-
-
-if __name__ == '__main__':
-    unittest.main()

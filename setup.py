@@ -1,7 +1,7 @@
-#!/usr/bin/env python
-# setup.py - Build system for Ubuntu One Storage Protocol package
+# -*- coding: utf-8 -*-
 #
 # Copyright 2009 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -21,9 +21,9 @@ import os
 import sys
 import subprocess
 
-from distutils.core import setup
 from distutils.spawn import find_executable
 from distutils.command import clean, build
+from setuptools import find_packages, setup
 
 
 class StorageProtocolBuild(build.build):
@@ -58,19 +58,30 @@ class StorageProtocolClean(clean.clean):
 
     def run(self):
         """Do the clean up"""
-        for source in \
-                glob.glob("ubuntuone/storageprotocol/*_pb2.py"):
+        for source in glob.glob("ubuntuone/storageprotocol/*_pb2.py"):
             os.unlink(source)
 
         # Call the parent class clean command
         clean.clean.run(self)
 
 
-setup(name='ubuntuone-storage-protocol',
-      version='99.12',
-      packages=['ubuntuone',
-                'ubuntuone.storageprotocol'],
-      extra_path='ubuntuone-storage-protocol',
-      cmdclass={'build': StorageProtocolBuild,
-                'clean': StorageProtocolClean},
-      )
+setup(
+    name='ubuntuone-storageprotocol',
+    namespace_packages=['ubuntuone'],
+    version='0.9.3',
+    description=(
+        'The protocol implementation for the Magicicada filesync server '
+        '(open source fork of the Ubuntu One filesync).'),
+    # From twisted - UserWarning: You do not have a working installation of the
+    # service_identity module: 'No module named service_identity'.  Please
+    # install it from <https://pypi.python.org/pypi/service_identity> and make
+    # sure all of its dependencies are satisfied.  Without the service_identity
+    # module, Twisted can perform only rudimentary TLS client hostname
+    # verification. Many valid certificate/hostname mappings may be rejected.
+    install_requires=[
+        'pyOpenSSL', 'protobuf', 'service_identity', 'twisted',
+        'zope.interface'],
+    packages=find_packages(),
+    cmdclass={'build': StorageProtocolBuild,
+              'clean': StorageProtocolClean},
+)

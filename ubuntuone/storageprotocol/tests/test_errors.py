@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# Author: Natalia B. Bidart <natalia.bidart@canonical.com>
-#
 # Copyright (C) 2010-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -28,6 +27,7 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
+
 """Tests for errors module."""
 
 import unittest
@@ -46,24 +46,18 @@ HIGH_LEVEL_ERRORS = {errors.StorageProtocolErrorSizeTooBig: dict(),
 class ErrorsTestCase(unittest.TestCase):
     """Basic testing of errors mapping."""
 
-    def setUp(self):
-        """Init."""
-
     def test_exceptions_are_storage_protocol_error(self):
         """High level exceptions inherit from StorageProtocolError."""
         for e, args in HIGH_LEVEL_ERRORS.iteritems():
-            self.assertTrue(isinstance(e(**args), errors.StorageProtocolError),
-                            "%r must inherit from StorageProtocolError" % e)
+            self.assertIsInstance(e(**args), errors.StorageProtocolError)
 
     def test_mapping(self):
         """Protocol's specific exceptions are correct."""
         for code_error, proto_error in errors._error_mapping.iteritems():
-            self.assertTrue(isinstance(proto_error(**REQ_ARGS),
-                            errors.StorageRequestError),
-                            "%r must inherit from StorageRequestError" %
-                             proto_error)
-            self.assertEqual(proto_error,
-                             errors.error_to_exception(code_error))
+            self.assertIsInstance(
+                proto_error(**REQ_ARGS), errors.StorageRequestError)
+            self.assertEqual(
+                proto_error, errors.error_to_exception(code_error))
 
     def test_quota_exceed_error(self):
         """QuotaExceeded error must have quota info."""

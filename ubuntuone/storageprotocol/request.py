@@ -1,9 +1,7 @@
-# ubuntuone.storageprotocol.request - base classes for
-#                                             network client and server
-#
-# Author: Lucio Torre <lucio.torre@canonical.com>
+# -*- coding: utf-8 -*-
 #
 # Copyright 2009-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -29,13 +27,13 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
-"""
-The base classes for the network client and server.
+
+"""The base classes for the network client and server.
 
 This classes provide the message serialization, delivery, request
 tracking and message handling.
-"""
 
+"""
 
 import struct
 import time
@@ -43,8 +41,6 @@ import time
 from twisted.internet.protocol import Protocol, connectionDone
 from twisted.internet.interfaces import IPushProducer
 from twisted.internet import defer
-# pylint and zope dont work
-# pylint: disable=E0611,F0401
 from zope.interface import implements
 
 from ubuntuone.storageprotocol import protocol_pb2, validators
@@ -228,7 +224,7 @@ class RequestHandler(Protocol):
                 target = self.requests[message.id].processMessage
                 try:
                     result = target(message)
-                except Exception, e:  # pylint: disable=W0703
+                except Exception as e:
                     self.requests[message.id].error(e)
             else:
                 name = protocol_pb2.Message.DESCRIPTOR \
@@ -450,11 +446,10 @@ class Request(object):
         'error_errback' func.
         """
         def _f(*args, **kwargs):
-            '''Function to be called from twisted when its time arrives.'''
+            """Function to be called from twisted when its time arrives."""
             if self.cancelled:
-                raise RequestCancelledError("The request id=%d is cancelled! "
-                                            "(before calling %r)" %
-                                                        (self.id, function))
+                msg = "The request id=%d is cancelled! (before calling %r)"
+                raise RequestCancelledError(msg % (self.id, function))
             return function(*args, **kwargs)
         return _f
 
@@ -467,7 +462,6 @@ class RequestResponse(Request):
 
     __slots__ = ('source_message',)
 
-    # pylint: disable=W0223
     def __init__(self, protocol, message):
         """Create a request response.
 
@@ -493,7 +487,6 @@ class Ping(Request):
 
     def _start(self):
         """start the request sending a ping message."""
-        # pylint: disable=W0201
         self.rtt = 0
         self._start_time = time.time()
         message = protocol_pb2.Message()
@@ -504,8 +497,6 @@ class Ping(Request):
     def processMessage(self, message):
         """calculate rtt if message is pong, error otherwise"""
         if message.type == protocol_pb2.Message.PONG:
-            # pylint: disable=W0201
-            # attributes are created in completion
             self.rtt = time.time() - self._start_time
             self.done()
         else:

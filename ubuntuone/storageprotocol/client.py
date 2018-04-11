@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
+#
 # Copyright 2009-2015 Canonical Ltd.
-# Copyright 2016 Chicharreros (https://launchpad.net/~chicharreros)
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -616,7 +618,6 @@ class GetContent(request.Request):
 
     def processMessage(self, message):
         """Process messages."""
-        # pylint: disable=W0201
         if message.type == protocol_pb2.Message.NODE_ATTR:
             if self.node_attr_callback is not None:
                 self.node_attr_callback(
@@ -667,7 +668,6 @@ class ListShares(request.Request):
 
     def _start(self):
         """Send the LIST_SHARES message to the server."""
-        # pylint: disable=W0201
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.LIST_SHARES
         self.sendMessage(message)
@@ -935,7 +935,6 @@ class Unlink(request.Request):
 
     @ivar new_generation: the generation that the volume is at now
     """
-    # pylint: disable=C0111
 
     __slots__ = ('share', 'node', 'new_generation')
 
@@ -1361,7 +1360,6 @@ class MakeObject(request.Request):
 
     def processMessage(self, message):
         """Handle messages."""
-        # pylint: disable=W0201
         if message.type == self.create_response:
             self.new_id = message.new.node
             self.new_parent_id = message.new.parent_node
@@ -1406,7 +1404,6 @@ class ProtocolVersion(request.Request):
 
     def processMessage(self, message):
         """Handle messages."""
-        # pylint: disable=W0201
         if message.type == protocol_pb2.Message.PROTOCOL_VERSION:
             self.other_protocol_version = message.protocol.version
             self.done()
@@ -1520,7 +1517,6 @@ class FreeSpaceInquiry(request.Request):
 
     def _start(self):
         """Send the FREE_SPACE_INQUIRY message to the server."""
-        # pylint: disable=W0201
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.FREE_SPACE_INQUIRY
         message.free_space_inquiry.share_id = self.share_id
@@ -1529,7 +1525,6 @@ class FreeSpaceInquiry(request.Request):
 
     def processMessage(self, message):
         """Process the answer from the server."""
-        # pylint: disable=W0201
         if message.type == protocol_pb2.Message.FREE_SPACE_INFO:
             self.free_bytes = message.free_space_info.free_bytes
             self.done()
@@ -1544,7 +1539,6 @@ class AccountInquiry(request.Request):
 
     def _start(self):
         """Send the FREE_SPACE_INQUIRY message to the server."""
-        # pylint: disable=W0201
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.ACCOUNT_INQUIRY
         self.sendMessage(message)
@@ -1552,7 +1546,6 @@ class AccountInquiry(request.Request):
 
     def processMessage(self, message):
         """Process the answer from the server."""
-        # pylint: disable=W0201
         if message.type == protocol_pb2.Message.ACCOUNT_INFO:
             self.purchased_bytes = message.account_info.purchased_bytes
             self.done()
@@ -1682,7 +1675,7 @@ class ThrottlingStorageClient(StorageClient):
 
 class StorageClientFactory(ClientFactory):
     """StorageClient factory."""
-    # pylint: disable=W0232
+
     protocol = StorageClient
 
 
@@ -1735,10 +1728,9 @@ class ThrottlingStorageClientFactory(StorageClientFactory, object):
         if not self.valid_limit(limit):
             raise ValueError('Read limit must be greater than 0.')
         self._readLimit = limit
-    # it's a property, pylint: disable=W0212
+
     readLimit = property(lambda self: self._readLimit, _set_read_limit)
     writeLimit = property(lambda self: self._writeLimit, _set_write_limit)
-    # pylint: enable=W0212
 
     def callLater(self, period, func, *args, **kwargs):
         """Wrapper around L{reactor.callLater} for test purpose."""

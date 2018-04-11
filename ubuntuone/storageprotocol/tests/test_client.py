@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+#
 # Copyright 2009-2015 Canonical Ltd.
 # Copyright 2016 Chicharreros (https://launchpad.net/~chicharreros)
 #
@@ -61,12 +61,8 @@ from ubuntuone.storageprotocol.client import (
 )
 
 from ubuntuone.storageprotocol import volumes
-from tests import test_delta_info
+from ubuntuone.storageprotocol.tests import test_delta_info
 
-# let's not get picky about aatributes outside __init__ in tests
-# pylint: disable=W0201
-# it's ok to access internals in the test suite
-# pylint: disable=W0212
 
 PATH = u'~/Documents/pdfs/moño/'
 NAME = u'UDF-me'
@@ -217,7 +213,7 @@ class ClientTestCase(unittest.TestCase):
         try:
             result = self.client.get_delta(share_id=SHARE, from_generation=0)
             self.assertTrue(self.called, 'GetDelta.start() was called')
-            self.assertTrue(isinstance(result, Deferred))
+            self.assertIsInstance(result, Deferred)
         finally:
             GetDelta.start = original
 
@@ -229,7 +225,7 @@ class ClientTestCase(unittest.TestCase):
         try:
             result = self.client.get_delta(share_id=SHARE, from_scratch=True)
             self.assertTrue(self.called, 'GetDelta.start() was called')
-            self.assertTrue(isinstance(result, Deferred))
+            self.assertIsInstance(result, Deferred)
         finally:
             GetDelta.start = original
 
@@ -247,7 +243,7 @@ class ClientTestCase(unittest.TestCase):
         try:
             result = self.client.create_udf(path=PATH, name=NAME)
             self.assertTrue(self.called, 'CreateUDF.start() was called')
-            self.assertTrue(isinstance(result, Deferred))
+            self.assertIsInstance(result, Deferred)
         finally:
             CreateUDF.start = original
 
@@ -259,7 +255,7 @@ class ClientTestCase(unittest.TestCase):
         try:
             result = self.client.list_volumes()
             self.assertTrue(self.called, 'ListVolumes.start() was called')
-            self.assertTrue(isinstance(result, Deferred))
+            self.assertIsInstance(result, Deferred)
         finally:
             ListVolumes.start = original
 
@@ -271,7 +267,7 @@ class ClientTestCase(unittest.TestCase):
         try:
             result = self.client.delete_volume(volume_id=VOLUME)
             self.assertTrue(self.called, 'DeleteVolume.start() was called')
-            self.assertTrue(isinstance(result, Deferred))
+            self.assertIsInstance(result, Deferred)
         finally:
             DeleteVolume.start = original
 

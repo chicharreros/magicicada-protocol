@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# Author: Natalia B. Bidart <natalia.bidart@canonical.com>
-#
 # Copyright (C) 2009-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -28,6 +27,7 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
+
 """Tests for volume data type."""
 
 import unittest
@@ -36,9 +36,6 @@ import uuid
 from copy import copy
 
 from ubuntuone.storageprotocol import protocol_pb2, volumes
-
-# let's not get picky about aatributes outside __init__ in tests
-# pylint: disable=W0201
 
 PATH = u'~/Documents/pdfs/moño/'
 NAME = u'What a beatiful volume'
@@ -79,7 +76,7 @@ class VolumeTestCase(unittest.TestCase):
 
     def test_is_a_volume(self):
         """Test class inheritance."""
-        self.assertTrue(isinstance(self.volume, volumes.Volume))
+        self.assertIsInstance(self.volume, volumes.Volume)
 
     def test_from_params(self):
         """Test creation using from_params."""
@@ -108,7 +105,6 @@ class VolumeTestCase(unittest.TestCase):
 class ShareTestCase(VolumeTestCase):
     """Check Share data type."""
 
-    # pylint: disable=W0212
     to_me = volumes._direction_prot2nice[protocol_pb2.Shares.TO_ME]
     only_view = volumes._access_prot2nice[protocol_pb2.Shares.VIEW]
 
@@ -133,7 +129,6 @@ class ShareTestCase(VolumeTestCase):
     def test_from_msg(self):
         """Test creation using from_msg."""
         message = protocol_pb2.Shares()
-        # pylint: disable=W0201
         message.share_id = str(VOLUME)
         message.subtree = str(NODE)
         message.generation = GENERATION
@@ -161,7 +156,6 @@ class UDFTestCase(VolumeTestCase):
     def test_from_msg(self):
         """Test creation using from_msg."""
         message = protocol_pb2.UDFs()
-        # pylint: disable=W0201
         message.volume = str(VOLUME)
         message.node = str(NODE)
         message.suggested_path = PATH
@@ -181,13 +175,8 @@ class RootTestCase(VolumeTestCase):
     def test_from_msg(self):
         """Test creation using from_msg."""
         message = protocol_pb2.Root()
-        # pylint: disable=W0201
         message.node = str(NODE)
         message.generation = GENERATION
         message.free_bytes = FREE_BYTES
         self.volume = self.volume_class.from_msg(message)
         self.assert_correct_attributes()
-
-
-if __name__ == '__main__':
-    unittest.main()

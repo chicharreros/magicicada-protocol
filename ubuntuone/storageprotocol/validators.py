@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2009-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -25,10 +27,12 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
+
 """Message validation."""
 
 import re
 from uuid import UUID
+
 from google.protobuf.message import Message as _PBMessage
 from google.protobuf.internal.containers import BaseContainer as _PBContainer
 try:
@@ -81,8 +85,8 @@ def is_valid_hash(a_hash):
     """
     # circular import
     from ubuntuone.storageprotocol import request
-    is_valid = a_hash == '' or a_hash == request.UNKNOWN_HASH or \
-               is_valid_sha1(a_hash)
+    is_valid = (a_hash == '' or a_hash == request.UNKNOWN_HASH or
+                is_valid_sha1(a_hash))
     return is_valid
 
 
@@ -90,9 +94,6 @@ def validate_message(message):
     """
     Recursively validate a message's fields
     """
-    # we will import ourselves
-    # pylint: disable=W0406
-
     is_invalid = []
     from ubuntuone.storageprotocol import validators  # this is us!
     for descriptor, submsg in message.ListFields():
@@ -114,9 +115,7 @@ def validate_message(message):
     return is_invalid
 
 
-# these are valid, pylint: disable=C0103
 is_valid_parent_node = is_valid_node
 is_valid_new_parent_node = is_valid_node
 is_valid_subtree = is_valid_node
 is_valid_share_id = is_valid_share
-# pylint: enable=C0103

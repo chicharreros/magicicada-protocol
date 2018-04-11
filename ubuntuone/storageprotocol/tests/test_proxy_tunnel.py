@@ -1,6 +1,7 @@
-# Test for proxy tunnel
+# -*- coding: utf-8 -*-
 #
 # Copyright 2009-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -26,9 +27,9 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
-"""Test for proxy tunnel"""
 
-import unittest
+"""Test for proxy tunnel."""
+
 import base64
 
 from twisted.internet.protocol import Protocol, ClientFactory, connectionDone
@@ -171,8 +172,8 @@ class TunnelTests(TwistedTestCase):
 
     def test_connect_auth(self):
         """Test connecting with auth"""
-        return test_response("HTTP/1.0 200 Connection Made\r\n\r\n",
-            auth="test:test")
+        return test_response(
+            "HTTP/1.0 200 Connection Made\r\n\r\n", auth="test:test")
 
     def test_auth_error(self):
         """Test auth failure"""
@@ -272,12 +273,3 @@ class TunnelTests(TwistedTestCase):
         FakeConnectHTTPS("test", 1, TestClientFactory(),
                          response, peer_callback=peer_callback)
         return d
-
-
-def test_suite():
-    """Test suite"""
-    return unittest.TestLoader().loadTestsFromName(__name__)
-
-
-if __name__ == "__main__":
-    unittest.main()

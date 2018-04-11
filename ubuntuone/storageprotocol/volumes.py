@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# Author: Natalia B. Bidart <natalia.bidart@canonical.com>
-#
 # Copyright 2009-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -28,13 +27,13 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
+
 """The volumes abstraction."""
 
 import uuid
 
 from ubuntuone.storageprotocol import protocol_pb2
 
-# these are valid, pylint: disable=C0103
 _direction_prot2nice = {
     protocol_pb2.Shares.FROM_ME: "from_me",
     protocol_pb2.Shares.TO_ME: "to_me",
@@ -46,7 +45,6 @@ _access_prot2nice = {
     protocol_pb2.Shares.MODIFY: "Modify",
 }
 _access_nice2prot = dict((y, x) for x, y in _access_prot2nice.items())
-# pylint: enable=C0103
 
 
 class Volume(object):

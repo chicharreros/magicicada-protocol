@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# Author: Natalia B. Bidart <natalia.bidart@canonical.com>
-#
 # Copyright 2010-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -28,6 +27,7 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
+
 """The errors abstraction."""
 
 import uuid
@@ -56,9 +56,8 @@ class StorageRequestError(StorageProtocolError):
         @param request: the request that generated this error.
         @param message: the message received that generated the error.
         """
-        error_name = protocol_pb2.Error.DESCRIPTOR \
-                 .enum_types_by_name['ErrorType'] \
-                 .values_by_number[message.error.type].name
+        error_name = protocol_pb2.Error.DESCRIPTOR.enum_types_by_name[
+            'ErrorType'].values_by_number[message.error.type].name
         super(StorageRequestError, self).__init__(error_name)
         #: the request that generated the error
         self.request = request

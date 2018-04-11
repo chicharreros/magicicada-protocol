@@ -1,9 +1,7 @@
-# ubuntuone.storageprotocol.tests.test_bytesproducer -
-#     BytesMessageProducer tests
-#
-# Author: Facundo Batista <facundo@canonical.com>
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2009-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -29,6 +27,7 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
+
 """Tests for directory content serialization/unserialization."""
 
 from __future__ import with_statement
@@ -52,9 +51,8 @@ class FakeRequest(object):
 
     def sendMessage(self, message):
         """Store the message in own list."""
-        name = protocol_pb2.Message.DESCRIPTOR \
-                  .enum_types_by_name['MessageType'] \
-                  .values_by_number[message.type].name
+        name = protocol_pb2.Message.DESCRIPTOR.enum_types_by_name[
+            'MessageType'].values_by_number[message.type].name
         self.messages.append(name)
 
 

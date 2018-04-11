@@ -1,9 +1,7 @@
-# ubuntuone.storageprotocol.tests.test_dircontent -
-#     directory content tests
-#
-# Author: Tim Cole <tim.cole@canonical.com>
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2009-2012 Canonical Ltd.
+# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License version 3,
@@ -29,6 +27,7 @@
 # do not wish to do so, delete this exception statement from your
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
+
 """Tests for directory content serialization/unserialization."""
 
 from __future__ import with_statement
