@@ -68,7 +68,7 @@ class StorageProtocolClean(clean.clean):
 setup(
     name='ubuntuone-storageprotocol',
     namespace_packages=['ubuntuone'],
-    version='0.9.3',
+    version='1.0',
     description=(
         'The protocol implementation for the Magicicada filesync server '
         '(open source fork of the Ubuntu One filesync).'),
