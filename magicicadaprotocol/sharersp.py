@@ -32,7 +32,7 @@
 
 import uuid
 
-from ubuntuone.storageprotocol import volumes
+from magicicadaprotocol import volumes
 
 
 class ShareResponse(object):

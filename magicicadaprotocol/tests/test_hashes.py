@@ -35,7 +35,7 @@ import os
 import pickle
 import unittest
 
-from ubuntuone.storageprotocol.content_hash import (
+from magicicadaprotocol.content_hash import (
     MagicContentHash,
     SHA1ContentHash,
     content_hash_factory,

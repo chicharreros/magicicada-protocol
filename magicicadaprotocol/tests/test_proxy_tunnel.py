@@ -36,7 +36,8 @@ from twisted.internet.protocol import Protocol, ClientFactory, connectionDone
 from twisted.internet import defer
 from twisted.trial.unittest import TestCase as TwistedTestCase
 from twisted.test.proto_helpers import StringTransport
-from ubuntuone.storageprotocol.proxy_tunnel import ProxyTunnelFactory
+
+from magicicadaprotocol.proxy_tunnel import ProxyTunnelFactory
 
 
 class FakeTransport(StringTransport):

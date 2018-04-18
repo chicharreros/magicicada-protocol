@@ -38,7 +38,7 @@ from cStringIO import StringIO
 from twisted.internet import defer, task
 from twisted.trial.unittest import TestCase as TwistedTestCase
 
-from ubuntuone.storageprotocol import client, protocol_pb2
+from magicicadaprotocol import client, protocol_pb2
 
 
 class FakeRequest(object):

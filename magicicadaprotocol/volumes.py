@@ -32,7 +32,7 @@
 
 import uuid
 
-from ubuntuone.storageprotocol import protocol_pb2
+from magicicadaprotocol import protocol_pb2
 
 _direction_prot2nice = {
     protocol_pb2.Shares.FROM_ME: "from_me",

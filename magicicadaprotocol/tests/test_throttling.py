@@ -35,7 +35,7 @@ from __future__ import with_statement
 from twisted.internet import defer, task
 from twisted.trial.unittest import TestCase as TwistedTestCase
 
-from ubuntuone.storageprotocol import client
+from magicicadaprotocol import client
 
 
 class FakeClient(object):

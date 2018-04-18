@@ -33,11 +33,12 @@
 from __future__ import with_statement
 
 from cStringIO import StringIO
-from ubuntuone.storageprotocol.dircontent import (
+from unittest import TestCase
+
+from magicicadaprotocol.dircontent import (
     parse_dir_content, write_dir_content, DirEntry,
     normalize_filename, validate_filename, InvalidFilename)
-from ubuntuone.storageprotocol.dircontent_pb2 import (DIRECTORY, FILE)
-from unittest import TestCase
+from magicicadaprotocol.dircontent_pb2 import DIRECTORY, FILE
 
 
 class TestFilenames(TestCase):

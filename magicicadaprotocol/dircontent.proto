@@ -27,9 +27,9 @@
  version.  If you delete this exception statement from all source
  files in the program, then also delete it here.
 */
-package ubuntuone.storageprotocol;
+package magicicadaprotocol;
 
-option java_package = "com.ubuntuone.storageprotocol";
+option java_package = "com.magicicadaprotocol";
 option java_outer_classname = "DirectoryContentProtocol";
 
 enum NodeType {

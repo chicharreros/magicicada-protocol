@@ -16,7 +16,7 @@
 # For further info, check  http://launchpad.net/magicicada-protocol
 
 ENV = $(CURDIR)/.env
-SRC_DIR = $(CURDIR)/ubuntuone
+SRC_DIR = $(CURDIR)/magicicadaprotocol
 PATH := $(ENV)/bin:$(PATH)
 PYTHON = $(ENV)/bin/python
 PYTHONPATH := $(ENV)/lib/python2.7:$(ENV)/lib/python2.7/site-packages:$(SRC_DIR):$(PYTHONPATH)
@@ -49,12 +49,12 @@ upload: bdist
 	$(ENV)/bin/twine upload dist/*.whl
 
 test: lint
-	SSL_CERTIFICATES_DIR=ubuntuone/storageprotocol/tests/certs PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python $(ENV)/bin/trial ubuntuone
+	SSL_CERTIFICATES_DIR=$(SRC_DIR)/tests/certs PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python $(ENV)/bin/trial magicicadaprotocol
 
 clean:
 	$(PYTHON) setup.py clean
 	find -name '*.pyc' -delete
-	rm -rf build dist sdist _trial_temp ubuntuone_storageprotocol.egg-info
+	rm -rf build dist sdist _trial_temp magicicadaprotocol.egg-info
 
 lint: $(ENV)
 	$(ENV)/bin/flake8 --filename='*.py' --exclude='$(ENV),*_pb2.py,build'

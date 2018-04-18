@@ -35,7 +35,7 @@ import uuid
 
 from copy import copy
 
-from ubuntuone.storageprotocol import protocol_pb2, volumes
+from magicicadaprotocol import protocol_pb2, volumes
 
 PATH = u'~/Documents/pdfs/moño/'
 NAME = u'What a beatiful volume'

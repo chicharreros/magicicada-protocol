@@ -38,10 +38,10 @@ import zlib
 
 from twisted.internet import reactor, defer
 
-from ubuntuone.storageprotocol.client import (
+from magicicadaprotocol import request, protocol_pb2
+from magicicadaprotocol.client import (
     StorageClientFactory, StorageClient)
-from ubuntuone.storageprotocol import request, protocol_pb2
-from ubuntuone.storageprotocol.dircontent_pb2 import (
+from magicicadaprotocol.dircontent_pb2 import (
     DirectoryContent, DIRECTORY)
 
 
@@ -302,7 +302,7 @@ if __name__ == "__main__":
     NUM_CLIENTS = 200
     NUM_FILES = 50
 
-    port_num = int(open("tmp/ubuntuone-api.port").read())
+    port_num = int(open("tmp/magicicada-api.port").read())
     deferred = authenticated_client("localhost", int(port_num))
     deferred.addCallback(create_dirs, NUM_CLIENTS)
 

@@ -43,8 +43,8 @@ from twisted.internet.interfaces import IPushProducer
 from twisted.internet import defer
 from zope.interface import implements
 
-from ubuntuone.storageprotocol import protocol_pb2, validators
-from ubuntuone.storageprotocol.errors import (
+from magicicadaprotocol import protocol_pb2, validators
+from magicicadaprotocol.errors import (
     StorageProtocolError, StorageProtocolErrorSizeTooBig,
     StorageProtocolProtocolError, StorageRequestError,
     RequestCancelledError, error_to_exception)

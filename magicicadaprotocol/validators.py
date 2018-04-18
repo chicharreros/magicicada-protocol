@@ -84,7 +84,7 @@ def is_valid_hash(a_hash):
 
     """
     # circular import
-    from ubuntuone.storageprotocol import request
+    from magicicadaprotocol import request
     is_valid = (a_hash == '' or a_hash == request.UNKNOWN_HASH or
                 is_valid_sha1(a_hash))
     return is_valid
@@ -95,7 +95,7 @@ def validate_message(message):
     Recursively validate a message's fields
     """
     is_invalid = []
-    from ubuntuone.storageprotocol import validators  # this is us!
+    from magicicadaprotocol import validators  # this is us!
     for descriptor, submsg in message.ListFields():
         if isinstance(submsg, CONTAINER_CLASSES):
             # containers are iterables that have messages in them

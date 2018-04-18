@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2009-2012 Canonical Ltd.
+# Copyright (C) 2009-2012 Canonical Ltd.
 # Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
@@ -28,6 +28,38 @@
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
 
-"""ubuntuone package."""
+"""Tests for querying lots of items."""
 
-__import__('pkg_resources').declare_namespace(__name__)
+import os
+import unittest
+
+from magicicadaprotocol.client import MultiQuery
+
+
+class TestQuery10(unittest.TestCase):
+    """
+    Check that MultiQuery works using an iterator
+    """
+    N = 10
+
+    def test_query_many(self):
+        """
+        Check the lenght is right. Not much more we can compare, is there?
+        """
+        # larger than real ids and hashes, and also randomer than real, so we
+        # can get away with creating less queries per Query
+        a_id = os.urandom(1024)
+        b_id = os.urandom(1024)
+        a_hash = os.urandom(1024)
+        items = [(a_id, b_id, a_hash) for _ in xrange(self.N)]
+        multi_query_list = MultiQuery(None, items)
+        multi_query_iter = MultiQuery(None, iter(items))
+        self.assertEqual(len(multi_query_list.queries),
+                         len(multi_query_iter.queries))
+
+
+class TestQuery1000(TestQuery10):
+    """
+    Check with even more queries
+    """
+    N = 1000

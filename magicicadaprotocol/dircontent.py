@@ -31,7 +31,8 @@
 """Standard routines for working with directory content."""
 
 import re
-from ubuntuone.storageprotocol.dircontent_pb2 import DirectoryContent
+
+from magicicadaprotocol.dircontent_pb2 import DirectoryContent
 
 ILLEGAL_FILENAMES = [u".", u".."]
 ILLEGAL_FILENAME_CHARS_RE_SOURCE = r'[\000/]'

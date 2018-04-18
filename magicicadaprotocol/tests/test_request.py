@@ -38,8 +38,8 @@ from twisted.internet import defer
 from twisted.python.failure import Failure
 from twisted.trial.unittest import TestCase as TwistedTestCase
 
-from ubuntuone.storageprotocol import errors, protocol_pb2
-from ubuntuone.storageprotocol.request import (
+from magicicadaprotocol import errors, protocol_pb2
+from magicicadaprotocol.request import (
     RequestHandler, Request, RequestResponse)
 
 

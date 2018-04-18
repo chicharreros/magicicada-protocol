@@ -33,7 +33,7 @@
 import unittest
 import uuid
 
-from ubuntuone.storageprotocol import errors, protocol_pb2
+from magicicadaprotocol import errors, protocol_pb2
 
 REQ_ARGS = dict(request=None, message=protocol_pb2.Message())
 

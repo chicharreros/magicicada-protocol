@@ -40,7 +40,7 @@ from twisted.internet.protocol import ClientFactory
 from twisted.internet import reactor, defer
 from twisted.python import log
 
-from ubuntuone.storageprotocol import (
+from magicicadaprotocol import (
     delta,
     protocol_pb2,
     public_file_info,
@@ -1896,7 +1896,7 @@ if __name__ == "__main__":
     #           ssl.ClientContextFactory())
 
     # using ssl over a proxy
-    # from ubuntuone.storageprotocol import proxy_tunnel
+    # from magicicadaprotocol import proxy_tunnel
     # proxy_tunnel.connectHTTPS('localhost', 3128,
     #        'localhost', 20101, StorageClientFactory(),
     #        user="test", passwd="test")

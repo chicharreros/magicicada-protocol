@@ -35,8 +35,8 @@ import uuid
 from twisted.internet import defer
 from twisted.trial.unittest import TestCase
 
-from ubuntuone.storageprotocol.sharersp import ShareResponse
-from ubuntuone.storageprotocol import protocol_pb2
+from magicicadaprotocol import protocol_pb2
+from magicicadaprotocol.sharersp import ShareResponse
 
 
 class ShareResponseFromParamsTest(TestCase):

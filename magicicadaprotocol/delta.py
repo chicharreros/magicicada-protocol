@@ -30,7 +30,7 @@
 
 """Provides wrapper classes for delta nodes messages."""
 
-from ubuntuone.storageprotocol import protocol_pb2
+from magicicadaprotocol import protocol_pb2
 
 FILE = 0
 DIRECTORY = 1

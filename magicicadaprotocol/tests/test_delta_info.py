@@ -32,7 +32,7 @@
 
 import unittest
 
-from ubuntuone.storageprotocol import (
+from magicicadaprotocol import (
     protocol_pb2,
     delta,
     content_hash,

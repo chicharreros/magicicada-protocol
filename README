@@ -1,18 +1,5 @@
 This package contains definitions for the protocol messages used by the
-Ubuntu One file storage/sharing service, as well as python code for a
-minimal client to talk directly to the storage servers.  Python code for
-local/offline functionality may be found in the ubuntuone-client package
-instead, as part of the official clients.
-
-This protocol applies only to the file storage service and not other
-Ubuntu One services.
-
-===
-
-Note: contributions to this package are accepted only from those who have
-signed the Ubuntu One Contributor agreement:
-
- https://launchpad.net/~ubuntuone-contributor-agreement
+Magicicada file storage/sharing service (open source fork of Ubuntu One).
 
 ===
 
@@ -29,7 +16,7 @@ However, note that unless you are very comfortable with what you are
 doing, if you are installing on an Ubuntu system it is probably better
 to build and install a Debian package.  Recent versions of Ubuntu do not
 load python modules from /usr/local by default, and you are likely to
-already have an installed ubuntuone-storage-protocol package in any case.
+already have an installed magicicadaprotocol package in any case.
 
 Protocol Overview:
 

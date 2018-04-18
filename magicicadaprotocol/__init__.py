@@ -28,4 +28,4 @@
 # version.  If you delete this exception statement from all source
 # files in the program, then also delete it here.
 
-"""ubuntuone.storageprotocol package."""
+"""magicicadaprotocol package."""

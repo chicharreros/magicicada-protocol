@@ -34,12 +34,11 @@ import unittest
 
 from StringIO import StringIO
 
+from mocker import Mocker, ANY
 from twisted.test.proto_helpers import StringTransport
 
-from ubuntuone.storageprotocol.client import PutContent, StorageClient
-from ubuntuone.storageprotocol import request
-from ubuntuone.storageprotocol import protocol_pb2
-from mocker import Mocker, ANY
+from magicicadaprotocol import protocol_pb2, request
+from magicicadaprotocol.client import PutContent, StorageClient
 
 
 class TestOffset(unittest.TestCase):

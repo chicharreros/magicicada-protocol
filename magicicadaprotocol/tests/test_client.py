@@ -42,8 +42,8 @@ from twisted.internet.defer import Deferred
 from twisted.trial.unittest import TestCase as TwistedTestCase
 from twisted.web import server, resource
 
-from ubuntuone.storageprotocol import protocol_pb2, sharersp, delta, request
-from ubuntuone.storageprotocol.client import (
+from magicicadaprotocol import delta, protocol_pb2, request, sharersp, volumes
+from magicicadaprotocol.client import (
     Authenticate,
     BytesMessageProducer,
     ChangePublicAccess,
@@ -60,8 +60,7 @@ from ubuntuone.storageprotocol.client import (
     Unlink,
 )
 
-from ubuntuone.storageprotocol import volumes
-from ubuntuone.storageprotocol.tests import test_delta_info
+from magicicadaprotocol.tests import test_delta_info
 
 
 PATH = u'~/Documents/pdfs/moño/'

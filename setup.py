@@ -39,7 +39,7 @@ class StorageProtocolBuild(build.build):
                              " package installed?\n")
             sys.exit(-1)
 
-        for source in glob.glob('ubuntuone/storageprotocol/*.proto'):
+        for source in glob.glob('magicicadaprotocol/*.proto'):
             # glob works with unix and does not like \ in the search path,
             # we use / and correct the issue on windows when appropiate
             if sys.platform == "win32":
@@ -58,7 +58,7 @@ class StorageProtocolClean(clean.clean):
 
     def run(self):
         """Do the clean up"""
-        for source in glob.glob("ubuntuone/storageprotocol/*_pb2.py"):
+        for source in glob.glob("magicicadaprotocol/*_pb2.py"):
             os.unlink(source)
 
         # Call the parent class clean command
@@ -66,9 +66,8 @@ class StorageProtocolClean(clean.clean):
 
 
 setup(
-    name='ubuntuone-storageprotocol',
-    namespace_packages=['ubuntuone'],
-    version='1.0',
+    name='magicicadaprotocol',
+    version='2.0',
     description=(
         'The protocol implementation for the Magicicada filesync server '
         '(open source fork of the Ubuntu One filesync).'),

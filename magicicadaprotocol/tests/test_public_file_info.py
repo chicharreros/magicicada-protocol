@@ -31,7 +31,7 @@
 
 import unittest
 
-from ubuntuone.storageprotocol import protocol_pb2, public_file_info, request
+from magicicadaprotocol import protocol_pb2, public_file_info, request
 
 SHARE = "share_id"
 NODE = "node_id"

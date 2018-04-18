@@ -32,8 +32,7 @@
 
 from twisted.internet import reactor
 
-from ubuntuone.storageprotocol.client import (
-    StorageClientFactory, StorageClient)
+from magicicadaprotocol.client import StorageClientFactory, StorageClient
 
 
 class PingClient(StorageClient):
@@ -83,7 +82,7 @@ if __name__ == "__main__":
     #           ssl.ClientContextFactory())
 
     # using ssl over a proxy
-    # from ubuntuone.storageprotocol import proxy_tunnel
+    # from magicicadaprotocol import proxy_tunnel
     # proxy_tunnel.connectHTTPS('localhost', 3128,
     #        'localhost', 20101, StorageClientFactory(),
     #        user="test", passwd="test")

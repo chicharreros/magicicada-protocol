@@ -35,7 +35,7 @@ from twisted.internet import defer, error, reactor, ssl
 from twisted.trial import unittest
 from twisted.web import client, resource, server
 
-from ubuntuone.storageprotocol import context
+from magicicadaprotocol import context
 
 
 class FakeCerts(object):

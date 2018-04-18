@@ -32,7 +32,7 @@
 
 import uuid
 
-from ubuntuone.storageprotocol import protocol_pb2
+from magicicadaprotocol import protocol_pb2
 
 
 class StorageProtocolError(Exception):
@@ -149,7 +149,7 @@ class QuotaExceededError(StorageRequestError):
         share_id will be None if we got the exception without free space info.
         """
         # to avoid circular dependencies
-        from ubuntuone.storageprotocol.request import ROOT
+        from magicicadaprotocol.request import ROOT
         super(QuotaExceededError, self).__init__(request, message)
         self.free_bytes = message.free_space_info.free_bytes
         if message.free_space_info.share_id:
