@@ -24,7 +24,7 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt update
-        sudo apt install make virtualenv
+        sudo apt install make
         make bootstrap
     - name: Run Tests
       run: make test
