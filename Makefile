@@ -1,4 +1,4 @@
-# Copyright 2015-2018 Chicharreros (https://launchpad.net/~chicharreros)
+# Copyright 2015-2022 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,7 @@ ENV = $(CURDIR)/.env
 SRC_DIR = $(CURDIR)/magicicadaprotocol
 PATH := $(ENV)/bin:$(PATH)
 PYTHON = $(ENV)/bin/python
-PYTHONPATH := $(ENV)/lib/python2.7:$(ENV)/lib/python2.7/site-packages:$(SRC_DIR):$(PYTHONPATH)
+PYTHONPATH := $(SRC_DIR):$(PYTHONPATH)
 
 # use protobuf cpp
 PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp
@@ -28,13 +28,16 @@ PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION_VERSION=2
 export PATH
 export PYTHONPATH
 
+deps:
+	cat dependencies.txt | sudo xargs apt-get install -y --no-install-recommends
+
 $(ENV): $(ENV)/bin/activate
 
 # only runs when requirements.txt or requirements-devel.txt changes
-$(ENV)/bin/activate: requirements.txt requirements-devel.txt
-	test -d $(ENV) || virtualenv $(ENV)
-	$(ENV)/bin/pip install -Ur requirements.txt
-	$(ENV)/bin/pip install -Ur requirements-devel.txt
+$(ENV)/bin/activate: deps requirements.txt requirements-devel.txt
+	test -d $(ENV) || virtualenv -p python2 $(ENV)
+	$(ENV)/bin/pip install -U pip setuptools
+	$(ENV)/bin/pip install -Ur requirements.txt -Ur requirements-devel.txt
 	touch $(ENV)/bin/activate
 
 bootstrap: build
