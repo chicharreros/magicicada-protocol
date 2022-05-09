@@ -1,7 +1,7 @@
 Magicicada Protocol
 ===================
 
-![tests](https://github.com/nessita/magicicada-protol/actions/workflows/tests.yml/badge.svg)
+![tests](https://github.com/chicharreros/magicicada-protocol/actions/workflows/tests.yml/badge.svg)
 
 This package contains definitions for the protocol messages used by the
 Magicicada file storage/sharing service (open source fork of Ubuntu One).
