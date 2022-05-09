@@ -1,0 +1,4 @@
+*.pyc
+.env
+_trial_temp
+build
