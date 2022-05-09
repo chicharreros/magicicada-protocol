@@ -1,7 +1,14 @@
+Magicicada Protocol
+===================
+
+![tests](https://github.com/nessita/magicicada-protol/actions/workflows/tests.yml/badge.svg)
+
 This package contains definitions for the protocol messages used by the
 Magicicada file storage/sharing service (open source fork of Ubuntu One).
 
-===
+
+Details
+-------
 
 The protocol message definitions here are provided as Google Protocol
 Buffer (.proto) files (see
