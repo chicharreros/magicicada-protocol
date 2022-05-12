@@ -2,3 +2,4 @@
 .env
 _trial_temp
 build
+magicicadaprotocol/*_pb2.py

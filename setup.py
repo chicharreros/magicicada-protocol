@@ -67,7 +67,7 @@ class StorageProtocolClean(clean.clean):
 
 setup(
     name='magicicadaprotocol',
-    version='2.0',
+    version='2.0.1',
     description=(
         'The protocol implementation for the Magicicada filesync server '
         '(open source fork of the Ubuntu One filesync).'),
