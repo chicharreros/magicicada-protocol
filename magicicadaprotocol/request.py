@@ -38,7 +38,7 @@ import time
 from twisted.internet.protocol import Protocol, connectionDone
 from twisted.internet.interfaces import IPushProducer
 from twisted.internet import defer
-from zope.interface import implements
+from zope.interface import implementer
 
 from magicicadaprotocol import protocol_pb2, validators
 from magicicadaprotocol.errors import (
@@ -64,6 +64,7 @@ MAX_PAYLOAD_SIZE = MAX_MESSAGE_SIZE - 300
 ROOT = ''
 
 
+@implementer(IPushProducer)
 class RequestHandler(Protocol):
     """the base class for a network peer.
 
@@ -71,7 +72,6 @@ class RequestHandler(Protocol):
     client subclasses. servers should start at 0, clients should start at 1.
     @cvar PROTOCOL_VERSION: the protocol version for this peer.
     """
-    implements(IPushProducer)
 
     SIZE, MESSAGE = range(2)
     REQUEST_ID_START = 0
@@ -101,7 +101,7 @@ class RequestHandler(Protocol):
     def connectionLost(self, reason=connectionDone):
         """Abort any outstanding requests when we lose our connection."""
         Protocol.connectionLost(self, reason)
-        requests = self.requests.values()
+        requests = list(self.requests.values())  # make a copy
         for request in requests:
             request.stopProducing()
             if request.started:
@@ -147,10 +147,10 @@ class RequestHandler(Protocol):
         """handle new data."""
         try:
             self.buildMessage(data)
-        except StorageProtocolError, e:
+        except StorageProtocolError as e:
             # here we handle and should log all protocol errors
             self.transport.loseConnection()
-            print "ERROR:", e
+            print("ERROR:", e)
 
     def write(self, data):
         """transport API to capture bytes written"""
@@ -274,7 +274,8 @@ class RequestHandler(Protocol):
         return p.deferred
 
 
-class Request(object):
+@implementer(IPushProducer)
+class Request:
     """base class for requests.
 
     requests talk with request handlers to get a request id and
@@ -285,7 +286,6 @@ class Request(object):
     @ivar deferred: the deferred that will be signaled on completion or error.
     @ivar id: the request id or None if not started
     """
-    implements(IPushProducer)
 
     __slots__ = ('protocol', 'id', 'deferred', 'producer', 'started',
                  'finished', 'cancelled', 'producing')
@@ -370,7 +370,7 @@ class Request(object):
         """remove the reference to self from the request handler"""
         self.finished = True
         self.started = False
-        del self.protocol.requests[self.id]
+        # del self.protocol.requests[self.id]
         self.protocol.removeProducer(self)
 
     def sendMessage(self, message):

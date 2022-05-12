@@ -27,10 +27,8 @@
 
 """Tests for directory content serialization/unserialization."""
 
-from __future__ import with_statement
-
 from unittest import TestCase
-from cStringIO import StringIO
+from io import BytesIO
 
 from twisted.internet import defer, task
 from twisted.trial.unittest import TestCase as TwistedTestCase
@@ -57,8 +55,8 @@ class TestProducingState(TestCase):
     """Test for filename validation and normalization."""
 
     def setUp(self):
-        fh = StringIO()
-        fh.write("abcde")
+        fh = BytesIO()
+        fh.write(b"abcde")
         fh.seek(0)
         req = FakeRequest()
         self.bmp = client.BytesMessageProducer(req, fh, 0)
@@ -105,8 +103,8 @@ class TestGenerateData(TwistedTestCase):
     @defer.inlineCallbacks
     def setUp(self):
         yield super(TestGenerateData, self).setUp()
-        fh = StringIO()
-        fh.write("abcde")
+        fh = BytesIO()
+        fh.write(b"abcde")
         fh.seek(0)
         self.req = FakeRequest()
         self.clock = task.Clock()

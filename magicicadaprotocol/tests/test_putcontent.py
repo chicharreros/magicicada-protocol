@@ -29,7 +29,7 @@
 
 import unittest
 
-from StringIO import StringIO
+from io import StringIO, BytesIO
 
 from twisted.test.proto_helpers import StringTransport
 
@@ -52,7 +52,7 @@ class TestOffset(unittest.TestCase):
         protocol.transport = StringTransport()
         protocol.max_payload_size = 20
 
-        fd = StringIO(
+        fd = BytesIO(
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
         pc = PutContent(protocol, 'share', 'node', '', '', 0, 0, 0, fd)
         message = protocol_pb2.Message()
@@ -69,7 +69,7 @@ class TestOffset(unittest.TestCase):
         protocol.transport = StringTransport()
         protocol.max_payload_size = 10
 
-        fd = StringIO()
+        fd = BytesIO()
         pc = PutContent(protocol, 'share', 'node', '', '', 0, 0, 0, fd)
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.BEGIN_CONTENT

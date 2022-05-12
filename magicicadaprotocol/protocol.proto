@@ -26,6 +26,9 @@
  version.  If you delete this exception statement from all source
  files in the program, then also delete it here.
 */
+
+syntax = "proto2";
+
 package magicicadaprotocol;
 
 option java_package = "com.magicicadaprotocol";
@@ -109,8 +112,8 @@ message Message {
     optional Protocol protocol = 4;
     repeated AuthParameter auth_parameters = 5;
     repeated KeyValue metadata = 44; // extra info we want to send to the server
-    optional bytes session_id = 42; // sent with AUTH_AUTHENTICATED
-                                    // for logging purposes
+    optional string session_id = 42; // sent with AUTH_AUTHENTICATED
+                                     // for logging purposes
     optional Root root = 6;
 
     // change monitoring
@@ -165,7 +168,7 @@ message Message {
 
     // public files
     optional ChangePublicAccess change_public_access = 45;
-    optional bytes public_url = 46;
+    optional string public_url = 46;
     optional PublicFileInfo public_file_info = 47;
 }
 
@@ -210,39 +213,39 @@ message KeyValue {
 }
 
 message Make {
-    optional bytes share = 1; // share is actually a volume id
-    optional bytes parent_node = 2;
+    optional string share = 1; // share is actually a volume id
+    optional string parent_node = 2;
     optional string name = 3;
 }
 
 message New {
-    optional bytes node = 1;
-    optional bytes parent_node = 2;
+    optional string node = 1;
+    optional string parent_node = 2;
     optional string name = 3;
 }
 
 message Root {
-    optional bytes node = 1;
+    optional string node = 1;
     optional uint64 generation = 2;
     optional uint64 free_bytes = 3;
 }
 
 message Query {
-    optional bytes share = 1;
-    optional bytes node = 2;
-    optional bytes hash = 3;
+    optional string share = 1;
+    optional string node = 2;
+    optional string hash = 3;
 }
 
 message NodeState {
-    optional bytes share = 1;
-    optional bytes node = 2;
-    optional bytes hash = 3;
+    optional string share = 1;
+    optional string node = 2;
+    optional string hash = 3;
 }
 
 message GetContent {
-    optional bytes share = 1;
-    optional bytes node = 2;
-    optional bytes hash = 3;
+    optional string share = 1;
+    optional string node = 2;
+    optional string hash = 3;
     optional int64 offset = 4;
 }
 
@@ -252,7 +255,7 @@ message CancelRequest {
 message NodeAttr {
     optional uint64 deflated_size = 1;
     optional uint64 size = 2;
-    optional bytes hash = 3;
+    optional string hash = 3;
     optional uint32 crc32 = 4;
 }
 
@@ -261,37 +264,37 @@ message Bytes {
 }
 
 message PutContent {
-    optional bytes share = 1;
-    optional bytes node = 2;
-    optional bytes previous_hash = 3;
-    optional bytes hash = 4;
+    optional string share = 1;
+    optional string node = 2;
+    optional string previous_hash = 3;
+    optional string hash = 4;
     optional uint32 crc32 = 5;
     optional uint64 size = 6;
     optional uint64 deflated_size = 7;
-    optional bytes upload_id = 8;
-    optional bytes magic_hash = 9;
+    optional string upload_id = 8;
+    optional string magic_hash = 9;
 }
 
 message BeginContent {
     optional uint64 offset = 2;
-    optional bytes upload_id = 3;
+    optional string upload_id = 3;
 }
 
 message UploadInProgress {
-    optional bytes upload = 1;
+    optional string upload = 1;
     optional int32 timestamp = 2;
 }
 
 message Move {
-    optional bytes share = 1;
-    optional bytes node = 2;
-    optional bytes new_parent_node = 3;
+    optional string share = 1;
+    optional string node = 2;
+    optional string new_parent_node = 3;
     optional string new_name = 4;
 }
 
 message Unlink {
-    optional bytes share = 1;
-    optional bytes node = 2;
+    optional string share = 1;
+    optional string node = 2;
 }
 
 message CreateShare {
@@ -299,7 +302,7 @@ message CreateShare {
         VIEW = 0;
         MODIFY = 1;
     }
-    optional bytes node = 1;
+    optional string node = 1;
     // share_to is the utf-8 encoded version of share_to
     optional string share_to = 2;
     optional string name = 3;
@@ -319,9 +322,9 @@ message Shares {
         MODIFY = 1;
     }
 
-    optional bytes share_id = 1;
+    optional string share_id = 1;
     optional Direction direction = 2;
-    optional bytes subtree = 3;
+    optional string subtree = 3;
 
     // following three unicode strings should be sent as utf8
     optional string share_name = 4;
@@ -333,7 +336,7 @@ message Shares {
     optional uint64 generation = 9;
     optional uint64 free_bytes = 10;
     // only for shares FROM_ME
-    optional bytes subtree_volume_id = 11;
+    optional string subtree_volume_id = 11;
 }
 
 message NotifyShare {
@@ -380,8 +383,8 @@ message CreateUDF {
 }
 
 message UDFs {
-    optional bytes volume = 1;
-    optional bytes node = 2;
+    optional string volume = 1;
+    optional string node = 2;
     // suggested path should be encoded with utf8
     optional string suggested_path = 3;
     optional uint64 generation = 4;
@@ -389,11 +392,11 @@ message UDFs {
 }
 
 message VolumeDeleted {
-    optional bytes volume = 1;
+    optional string volume = 1;
 }
 
 message DeleteVolume {
-    optional bytes volume = 1;
+    optional string volume = 1;
 }
 
 message Volumes {
@@ -445,12 +448,12 @@ message AccountInfo {
 }
 
 message VolumeNewGeneration {
-    optional bytes volume = 1;
+    optional string volume = 1;
     optional uint64 generation = 2;
 }
 
 message GetDelta {
-    optional bytes share = 1;
+    optional string share = 1;
     optional uint64 from_generation = 2;
     optional bool from_scratch = 3;
 }
@@ -472,12 +475,12 @@ message FileInfo {
         SYMLINK = 2;
     }
     optional FileType type = 1;
-    optional bytes parent = 2;
-    optional bytes share = 3;
-    optional bytes node = 4;
+    optional string parent = 2;
+    optional string share = 3;
+    optional string node = 4;
     optional string name = 5;
     optional bool is_public = 6;
-    optional bytes content_hash = 7;
+    optional string content_hash = 7;
     optional uint32 crc32 = 8;
     optional uint64 size = 9;
     optional uint64 last_modified = 10;
@@ -490,16 +493,16 @@ message DeltaEnd {
 }
 
 message ChangePublicAccess {
-    optional bytes share = 1;
-    optional bytes node = 2;
+    optional string share = 1;
+    optional string node = 2;
     optional bool is_public = 3;
 }
 
 message PublicFileInfo {
-    optional bytes share = 1;
-    optional bytes node = 2;
+    optional string share = 1;
+    optional string node = 2;
     optional bool is_public = 3;
-    optional bytes public_url = 4;
+    optional string public_url = 4;
 }
 
 /*

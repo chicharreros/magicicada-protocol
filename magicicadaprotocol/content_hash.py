@@ -36,7 +36,7 @@ def noop():
     """No op."""
 
 
-class ContentHash(object):
+class ContentHash:
     """Encapsulate the generation of content hashes.
 
     We cant subclass openssl hash classes, so we do some
@@ -73,7 +73,7 @@ class SHA1ContentHash(ContentHash):
     method_name = "sha1"
 
 
-class HiddenMagicHash(object):
+class HiddenMagicHash:
     """The magic hash value, hidden.
 
     You can access the value by the internal attribute '_magic_hash', but
@@ -97,7 +97,7 @@ class MagicContentHash(ContentHash):
 
     def __init__(self):
         self.hash_object = self.method()
-        self.update("Ubuntu One")
+        self.update(b"Ubuntu One")
 
     def digest(self):
         """Forbidden access."""
@@ -125,4 +125,4 @@ def crc32(data, previous_crc32=0):
     Always returns positive values.
 
     """
-    return zlib.crc32(data, previous_crc32) & 0xFFFFFFFFL
+    return zlib.crc32(data, previous_crc32) & 0xFFFFFFFF

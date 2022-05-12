@@ -32,7 +32,7 @@ import uuid
 from magicicadaprotocol import volumes
 
 
-class ShareResponse(object):
+class ShareResponse:
     """This is a handy object to support all the fields of a share listing."""
 
     @classmethod
@@ -97,7 +97,7 @@ class ShareResponse(object):
         return t
 
 
-class NotifyShareHolder(object):
+class NotifyShareHolder:
     """This is a handy object to support all the fields of a share notify."""
 
     @classmethod
@@ -119,9 +119,9 @@ class NotifyShareHolder(object):
         o = cls()
         o.share_id = uuid.UUID(msg.share_id)
         o.subtree = msg.subtree
-        o.share_name = msg.share_name.decode("utf8")
-        o.from_username = msg.from_username.decode("utf8")
-        o.from_visible_name = msg.from_visible_name.decode("utf8")
+        o.share_name = msg.share_name
+        o.from_username = msg.from_username
+        o.from_visible_name = msg.from_visible_name
         o.access_level = volumes._access_prot2nice[msg.access_level]
         return o
 
@@ -129,9 +129,9 @@ class NotifyShareHolder(object):
         """Dumps the object information to a given message."""
         msg.share_id = str(self.share_id)
         msg.subtree = str(self.subtree)
-        msg.share_name = self.share_name.encode("utf8")
-        msg.from_username = self.from_username.encode("utf8")
-        msg.from_visible_name = self.from_visible_name.encode("utf8")
+        msg.share_name = self.share_name
+        msg.from_username = self.from_username
+        msg.from_visible_name = self.from_visible_name
         msg.access_level = volumes._access_nice2prot[self.access_level]
 
     def __str__(self):

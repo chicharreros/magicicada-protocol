@@ -41,18 +41,18 @@ class PingClient(StorageClient):
     def connectionMade(self):
         """Setup and call callback."""
         StorageClient.connectionMade(self)
-        print "Connection made."
+        print("Connection made.")
         d = self.ping()
 
         def done(request):
             """We have the ping reply"""
-            print "Ping RTT:", request.rtt
+            print("Ping RTT:", request.rtt)
             reactor.stop()
 
         def error(failure):
             """Something went wrong."""
-            print "Error:"
-            print failure.getTraceback()
+            print("Error:")
+            print(failure.getTraceback())
             reactor.stop()
 
         d.addCallbacks(done, error)
@@ -66,7 +66,7 @@ class PingClientFactory(StorageClientFactory):
     def clientConnectionFailed(self, connector, reason):
         """We failed at connecting."""
 
-        print 'Connection failed. Reason:', reason
+        print('Connection failed. Reason:', reason)
         reactor.stop()
 
 

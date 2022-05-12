@@ -35,7 +35,7 @@ $(ENV): $(ENV)/bin/activate
 
 # only runs when requirements.txt or requirements-devel.txt changes
 $(ENV)/bin/activate: deps requirements.txt requirements-devel.txt
-	test -d $(ENV) || virtualenv -p python2 $(ENV)
+	test -d $(ENV) || virtualenv $(ENV)
 	$(ENV)/bin/pip install -U pip setuptools
 	$(ENV)/bin/pip install -Ur requirements.txt -Ur requirements-devel.txt
 	touch $(ENV)/bin/activate

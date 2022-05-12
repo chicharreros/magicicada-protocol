@@ -70,7 +70,7 @@ class FakeCerts(object):
         fullpath = os.path.join(self.cert_dir, filename)
         if os.path.exists(fullpath):
             os.unlink(fullpath)
-        with open(fullpath, 'wt') as fd:
+        with open(fullpath, 'wb') as fd:
             fd.write(data)
         return fullpath
 
@@ -120,8 +120,9 @@ class SSLContextTestCase(unittest.TestCase):
         site = server.Site(FakeResource())
         port = reactor.listenSSL(0, site, server_context)
         self.addCleanup(port.stopListening)
-        url = "https://localhost:%d" % port.getHost().port
-        result = yield client.getPage(url, contextFactory=client_context)
+        url = b"https://localhost:%d" % port.getHost().port
+        agent = client.Agent(reactor, client_context)
+        result = yield agent.request(b"GET", url)
         self.assertEqual(result, "ok")
 
     @defer.inlineCallbacks
@@ -209,6 +210,7 @@ class CertLoadingTestCase(unittest.TestCase):
     def test_use_all_certificates_and_fail(self):
         """Use system installed certificates and fail checking self-signed."""
         certs = FakeCerts(self, "localhost")
+        # os.environ['SSL_CERTIFICATES_DIR'] = certs.cert_dir
         server_context = ssl.DefaultOpenSSLContextFactory(
             certs.server_key_path, certs.server_cert_path)
         client_context = context.get_ssl_context(no_verify=False,
@@ -216,10 +218,6 @@ class CertLoadingTestCase(unittest.TestCase):
         site = server.Site(FakeResource())
         port = reactor.listenSSL(0, site, server_context)
         self.addCleanup(port.stopListening)
-        url = "https://localhost:%d" % port.getHost().port
-        try:
-            yield client.getPage(url, contextFactory=client_context)
-        except SSL.Error:
-            return
-        else:
-            self.fail("Should fail with SSL Error.")
+        url = b"https://localhost:%d" % port.getHost().port
+        agent = client.Agent(reactor, client_context)
+        yield self.assertRaises(SSL.Error, agent.request, b"GET", url)

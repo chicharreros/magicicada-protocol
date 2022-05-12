@@ -29,10 +29,10 @@
 
 import base64
 
-from twisted.internet.protocol import Protocol, ClientFactory, connectionDone
 from twisted.internet import defer
+from twisted.internet.protocol import Protocol, ClientFactory, connectionDone
+from twisted.internet.testing import StringTransport
 from twisted.trial.unittest import TestCase as TwistedTestCase
-from twisted.test.proto_helpers import StringTransport
 
 from magicicadaprotocol.proxy_tunnel import ProxyTunnelFactory
 
@@ -42,16 +42,16 @@ class FakeTransport(StringTransport):
 
     def __init__(self, reply_func, remote_func=None):
         """Initialization for fake transport"""
-        StringTransport.__init__(self)
+        super().__init__()
         self.reply_func = reply_func
         self.remote_func = remote_func
         self.done = False
 
     def write(self, data):
         """Write some data"""
-        StringTransport.write(self, data)
+        super().write(data)
         if not self.done:
-            if "\r\n\r\n" in self.value():
+            if b"\r\n\r\n" in self.value():
                 self.done = True
                 self.reply_func(self.value())
 
@@ -61,7 +61,7 @@ class FakeTransport(StringTransport):
 
     def writeSequence(self, data):
         """Write a sequence"""
-        self.write(''.join(data))
+        self.write(b''.join(data))
 
     def startTLS(self, *args, **kwargs):
         """Fake starttls"""
@@ -130,13 +130,18 @@ def make_server(proxy_callback, peer_callback, auth):
 
 def test_response(response_string, auth=None):
     """Test the response"""
+
+    assert isinstance(response_string, bytes), (
+        '%r should be bytes' % response_string)
+
     def response(data, proto, fact):
         """Response callback"""
         if auth is not None:
-            auth_line = "Proxy-Authorization: Basic " + \
-                base64.b64encode("test:test")
+            auth_line = (
+                b"Proxy-Authorization: Basic " +
+                base64.b64encode(b"test:test"))
             if auth_line not in data:
-                proto.dataReceived("HTTP/1.0 403 Forbidden\r\n\r\n")
+                proto.dataReceived(b"HTTP/1.0 403 Forbidden\r\n\r\n")
             else:
                 proto.dataReceived(response_string)
         else:
@@ -148,12 +153,12 @@ class TunnelTests(TwistedTestCase):
     """Test the proxy tunnel"""
     def test_connect(self):
         """Test connecting"""
-        return test_response("HTTP/1.0 200 Connection Made\r\n\r\n")
+        return test_response(b"HTTP/1.0 200 Connection Made\r\n\r\n")
 
     def test_connect_failure(self):
         """Test connection failure"""
         d = defer.Deferred()
-        d2 = test_response("HTTP/1.0 503 Service Unavailable\r\n\r\n")
+        d2 = test_response(b"HTTP/1.0 503 Service Unavailable\r\n\r\n")
         d2.addCallbacks(
             lambda r: d.errback(Exception("error: connection made")),
             lambda r: d.callback("ok"))
@@ -163,7 +168,7 @@ class TunnelTests(TwistedTestCase):
         """Test auth requriement"""
         d = defer.Deferred()
         d2 = test_response(
-            "HTTP/1.0 407 Proxy Authentication Required\r\n\r\n")
+            b"HTTP/1.0 407 Proxy Authentication Required\r\n\r\n")
         d2.addCallbacks(
             lambda r: d.errback(Exception("error: connection made")),
             lambda r: d.callback("ok"))
@@ -172,12 +177,12 @@ class TunnelTests(TwistedTestCase):
     def test_connect_auth(self):
         """Test connecting with auth"""
         return test_response(
-            "HTTP/1.0 200 Connection Made\r\n\r\n", auth="test:test")
+            b"HTTP/1.0 200 Connection Made\r\n\r\n", auth="test:test")
 
     def test_auth_error(self):
         """Test auth failure"""
         d = defer.Deferred()
-        d2 = test_response("HTTP/1.0 200 Connection Made\r\n\r\n",
+        d2 = test_response(b"HTTP/1.0 200 Connection Made\r\n\r\n",
                            auth="test:notthepassword")
         d2.addCallbacks(
             lambda r: d.errback(Exception("error: connection made")),
@@ -190,7 +195,7 @@ class TunnelTests(TwistedTestCase):
 
         def response(data, proto, fact):
             """Response callback"""
-            proto.dataReceived("HTTP/1.0 200 Connection Made\r\n\r\n")
+            proto.dataReceived(b"HTTP/1.0 200 Connection Made\r\n\r\n")
 
         def peer_callback(data, proto, fact):
             """Peer callback"""
@@ -198,7 +203,7 @@ class TunnelTests(TwistedTestCase):
 
         class TestClient(Protocol):
             """Test echo Client"""
-            __message = "hello world!"
+            __message = b"hello world!"
 
             def __init__(self):
                 """Initialize ourselves"""
@@ -213,7 +218,7 @@ class TunnelTests(TwistedTestCase):
                 if data == self.__message:
                     d.callback("ok")
                 else:
-                    d.errback(Exception("wrong data: " + data))
+                    d.errback(Exception("wrong data: %s" % data))
 
         class TestClientFactory(ClientFactory):
             """Factory for test echo client"""
@@ -236,11 +241,11 @@ class TunnelTests(TwistedTestCase):
 
         def response(data, proto, fact):
             """Response callback"""
-            proto.dataReceived("HTTP/1.0 200 Connection Made\r\n\r\n")
+            proto.dataReceived(b"HTTP/1.0 200 Connection Made\r\n\r\n")
 
         def peer_callback(data, proto, fact):
             """Peer callback"""
-            proto.connectionLost("goodbye")
+            proto.connectionLost(b"goodbye")
 
         class TestClient(Protocol):
             """Test client"""
@@ -251,11 +256,11 @@ class TunnelTests(TwistedTestCase):
 
             def connectionMade(self):
                 """Connection succeeded"""
-                self.transport.write("die")
+                self.transport.write(b"die")
 
             def connectionLost(self, reason=connectionDone):
                 """Connection lost"""
-                d.callback("ok")
+                d.callback(b"ok")
 
         class TestClientFactory(ClientFactory):
             """Factory for test client"""

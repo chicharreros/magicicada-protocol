@@ -38,7 +38,7 @@ file_type_registry = {
 }
 
 
-class FileInfoDelta(object):
+class FileInfoDelta:
     """Hold the file/directory object information for a delta."""
 
     def __init__(self, generation, is_live, file_type, parent_id,

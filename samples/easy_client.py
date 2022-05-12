@@ -65,7 +65,7 @@ def retry(function):
             if failure.check(request.StorageRequestError) \
                     and failure.value.error_message.error.type == \
                     protocol_pb2.Error.TRY_AGAIN:
-                print "retry", args
+                print("retry", args)
                 d = defer.Deferred()
                 reactor.callLater(delay_time(step), d.callback, None)
                 d.addCallback(lambda _: function(self, *args, **kwargs))
@@ -139,7 +139,7 @@ class EasyClient(StorageClient):
                 unserialized_content.ParseFromString(content)
                 for entry in unserialized_content.entries:
                     if entry.name == name and entry.node_type == DIRECTORY:
-                        print "is directory", entry
+                        print("is directory", entry)
                         return entry.node
                 raise NotDirectory("name %s is not a directory" % name)
             d.addCallback(is_directory)
@@ -268,13 +268,13 @@ def sr_result(result, f, *args, **kwargs):
 def log(*args, **kwargs):
     """print args and kwargs."""
     for arg in args:
-        print arg,
-    print kwargs
+        print(arg, end=' ')
+    print(kwargs)
 
 
 def show_error(failure):
     """print the traceback."""
-    print failure.getTraceback()
+    print(failure.getTraceback())
 
 
 if __name__ == "__main__":
@@ -321,6 +321,6 @@ if __name__ == "__main__":
     deferred.addCallback(fire_clients)
     deferred.addCallback(lambda _: reactor.stop())
     deferred.addErrback(show_error)
-    print "Starting reactor"
+    print("Starting reactor")
     start_time = time.time()
     reactor.run()

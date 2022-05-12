@@ -44,7 +44,7 @@ _access_prot2nice = {
 _access_nice2prot = dict((y, x) for x, y in _access_prot2nice.items())
 
 
-class Volume(object):
+class Volume:
     """A generic volume."""
 
     def __init__(self, volume_id, node_id, generation, free_bytes):
