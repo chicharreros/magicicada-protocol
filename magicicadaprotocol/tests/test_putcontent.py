@@ -53,7 +53,7 @@ class TestOffset(unittest.TestCase):
         protocol.max_payload_size = 20
 
         fd = BytesIO(
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
+            b"Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
         pc = PutContent(protocol, 'share', 'node', '', '', 0, 0, 0, fd)
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.BEGIN_CONTENT

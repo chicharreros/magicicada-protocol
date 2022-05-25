@@ -146,6 +146,7 @@ def test_response(response_string, auth=None):
                 proto.dataReceived(response_string)
         else:
             proto.dataReceived(response_string)
+
     return make_server(response, lambda x, y, z: None, auth)
 
 

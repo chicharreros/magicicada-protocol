@@ -72,14 +72,18 @@ def get_certificates():
         if os.path.isdir(full_path) or not fname.endswith(".pem"):
             continue
         with open(full_path, 'r') as fd:
-            ca_file = ssl.Certificate.loadPEM(fd.read())
-            # we need to avoid adding the same cert twice as openssl
-            # doesn't like it
+            data = fd.read()
+        if 'BEGIN CERTIFICATE' in data:
+            ca_file = ssl.Certificate.loadPEM(data)
+            # avoid adding the same cert twice as openssl doesn't like it
             digest = ca_file.original.digest("sha1")
             if digest in digests:
                 continue
             digests.add(digest)
             ca_files.append(ca_file.original)
+        else:
+            log.err("Cannot load certificate at %s, ignoring.", full_path)
+
     return ca_files
 
 

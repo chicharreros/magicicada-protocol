@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2015-2022 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
@@ -466,6 +464,8 @@ class RequestTestCase(TestCase):
         self.done_called = False
         request.deferred.addCallbacks(
             was_called(self, 'done_called'), faked_error)
+        # request.start()
+        request.id = 42
         return request
 
 
@@ -896,7 +896,6 @@ class PutContentTestCase(RequestTestCase):
         """The producer uses the payload size from the request."""
         # set up the PutContent
         pc = self.make_request(None, None, None, None, None, None, None, None)
-        pc.id = 42
         assert 12 != pc.max_payload_size
         pc.max_payload_size = 12
 
@@ -905,19 +904,8 @@ class PutContentTestCase(RequestTestCase):
         producer = BytesMessageProducer(pc, fake_file, 0)
         producer.producing = True
 
-        # set up a function to check and go!
-        d = Deferred()
-
-        def check(message):
-            """Check."""
-            self.assertEqual(len(message.bytes.bytes), 12)
-            producer.producing = False
-            d.callback(True)
-
-        # pc.sendMessage = check
         producer.go()
         self.assertEqual(fake_file.tell(), 12)
-        # return d
 
 
 class ChangePublicAccessTestCase(RequestTestCase):

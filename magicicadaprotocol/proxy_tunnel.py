@@ -80,10 +80,14 @@ class ProxyTunnelClient(Protocol):
         # do auth
         user = self.factory.user
         if user is not None:
-            auth_str = "%s:%s" % (user, self.factory.passwd)
+            if isinstance(user, str):
+                user = user.encode('utf8')
+            passwd = self.factory.passwd
+            if isinstance(passwd, str):
+                passwd = passwd.encode('utf8')
+            auth_bytes = base64.b64encode(b"%s:%s" % (user, passwd))
             self.sendHeader(
-                "Proxy-Authorization",
-                "Basic %s" % base64.b64encode(auth_str.encode("utf8")))
+                "Proxy-Authorization", "Basic %s" % auth_bytes.decode("utf8"))
         self.write_line()
 
     def error(self, reason):

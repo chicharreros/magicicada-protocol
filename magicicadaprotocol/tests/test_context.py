@@ -108,7 +108,7 @@ class FakeResource(resource.Resource):
 
     def render(self, request):
         """Render this resource."""
-        return "ok"
+        return b"ok"
 
 
 class SSLContextTestCase(unittest.TestCase):
@@ -121,18 +121,16 @@ class SSLContextTestCase(unittest.TestCase):
         port = reactor.listenSSL(0, site, server_context)
         self.addCleanup(port.stopListening)
         url = b"https://localhost:%d" % port.getHost().port
-        agent = client.Agent(reactor, client_context)
-        result = yield agent.request(b"GET", url)
-        self.assertEqual(result, "ok")
+        result = yield client.getPage(url, contextFactory=client_context)
+        self.assertEqual(result, b"ok")
 
     @defer.inlineCallbacks
     def assert_cert_failed_verify(self, server_context, client_context):
         d = self.verify_context(server_context, client_context)
         e = yield self.assertFailure(d, SSL.Error)
-        self.assertEqual(len(e.message), 1)
-        expected = ('SSL routines', 'tls_process_server_certificate',
-                    'certificate verify failed')
-        self.assertEqual(e.message[0], expected)
+        self.assertEqual(len(e.args), 1)
+        expected = [('SSL routines', '', 'certificate verify failed')]
+        self.assertEqual(e.args[0], expected)
 
     @defer.inlineCallbacks
     def test_no_verify(self):
@@ -210,7 +208,7 @@ class CertLoadingTestCase(unittest.TestCase):
     def test_use_all_certificates_and_fail(self):
         """Use system installed certificates and fail checking self-signed."""
         certs = FakeCerts(self, "localhost")
-        # os.environ['SSL_CERTIFICATES_DIR'] = certs.cert_dir
+        os.environ['SSL_CERTIFICATES_DIR'] = certs.cert_dir
         server_context = ssl.DefaultOpenSSLContextFactory(
             certs.server_key_path, certs.server_cert_path)
         client_context = context.get_ssl_context(no_verify=False,
@@ -219,5 +217,5 @@ class CertLoadingTestCase(unittest.TestCase):
         port = reactor.listenSSL(0, site, server_context)
         self.addCleanup(port.stopListening)
         url = b"https://localhost:%d" % port.getHost().port
-        agent = client.Agent(reactor, client_context)
-        yield self.assertRaises(SSL.Error, agent.request, b"GET", url)
+        yield self.assertFailure(
+            client.getPage(url, contextFactory=client_context), SSL.Error)
