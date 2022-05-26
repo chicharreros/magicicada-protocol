@@ -32,13 +32,12 @@
 import StringIO
 import os
 import sys
-import unittest
 import uuid
 
 from twisted.application import internet, service
 from twisted.internet import defer
 from twisted.internet.defer import Deferred
-from twisted.trial.unittest import TestCase as TwistedTestCase
+from twisted.trial.unittest import TestCase
 from twisted.web import server, resource
 
 from magicicadaprotocol import delta, protocol_pb2, request, sharersp, volumes
@@ -188,7 +187,7 @@ class FakedProtocol(StorageClient):
         self.messages.append(message)
 
 
-class ClientTestCase(unittest.TestCase):
+class ClientTestCase(TestCase):
     """Check that MultiQuery works using an iterator."""
 
     def setUp(self):
@@ -205,27 +204,19 @@ class ClientTestCase(unittest.TestCase):
     # client to server
     def test_client_get_delta(self):
         """Get a delta."""
-        original = GetDelta.start
-        GetDelta.start = was_called(self, 'called')
+        self.patch(GetDelta, 'start', was_called(self, 'called'))
 
-        try:
-            result = self.client.get_delta(share_id=SHARE, from_generation=0)
-            self.assertTrue(self.called, 'GetDelta.start() was called')
-            self.assertIsInstance(result, Deferred)
-        finally:
-            GetDelta.start = original
+        result = self.client.get_delta(share_id=SHARE, from_generation=0)
+        self.assertTrue(self.called, 'GetDelta.start() was called')
+        self.assertIsInstance(result, Deferred)
 
     def test_client_get_delta_from_scratch(self):
         """Get a delta from scratch."""
-        original = GetDelta.start
-        GetDelta.start = was_called(self, 'called')
+        self.patch(GetDelta, 'start', was_called(self, 'called'))
 
-        try:
-            result = self.client.get_delta(share_id=SHARE, from_scratch=True)
-            self.assertTrue(self.called, 'GetDelta.start() was called')
-            self.assertIsInstance(result, Deferred)
-        finally:
-            GetDelta.start = original
+        result = self.client.get_delta(share_id=SHARE, from_scratch=True)
+        self.assertTrue(self.called, 'GetDelta.start() was called')
+        self.assertIsInstance(result, Deferred)
 
     def test_client_get_delta_bad(self):
         """Require from_generation or from_scratch."""
@@ -235,39 +226,27 @@ class ClientTestCase(unittest.TestCase):
 
     def test_create_udf(self):
         """Test create_udf."""
-        original = CreateUDF.start
-        CreateUDF.start = was_called(self, 'called')
+        self.patch(CreateUDF, 'start', was_called(self, 'called'))
 
-        try:
-            result = self.client.create_udf(path=PATH, name=NAME)
-            self.assertTrue(self.called, 'CreateUDF.start() was called')
-            self.assertIsInstance(result, Deferred)
-        finally:
-            CreateUDF.start = original
+        result = self.client.create_udf(path=PATH, name=NAME)
+        self.assertTrue(self.called, 'CreateUDF.start() was called')
+        self.assertIsInstance(result, Deferred)
 
     def test_list_volumes(self):
         """Test list_volumes."""
-        original = ListVolumes.start
-        ListVolumes.start = was_called(self, 'called')
+        self.patch(ListVolumes, 'start', was_called(self, 'called'))
 
-        try:
-            result = self.client.list_volumes()
-            self.assertTrue(self.called, 'ListVolumes.start() was called')
-            self.assertIsInstance(result, Deferred)
-        finally:
-            ListVolumes.start = original
+        result = self.client.list_volumes()
+        self.assertTrue(self.called, 'ListVolumes.start() was called')
+        self.assertIsInstance(result, Deferred)
 
     def test_delete_volume(self):
         """Test delete_volume."""
-        original = DeleteVolume.start
-        DeleteVolume.start = was_called(self, 'called')
+        self.patch(DeleteVolume, 'start', was_called(self, 'called'))
 
-        try:
-            result = self.client.delete_volume(volume_id=VOLUME)
-            self.assertTrue(self.called, 'DeleteVolume.start() was called')
-            self.assertIsInstance(result, Deferred)
-        finally:
-            DeleteVolume.start = original
+        result = self.client.delete_volume(volume_id=VOLUME)
+        self.assertTrue(self.called, 'DeleteVolume.start() was called')
+        self.assertIsInstance(result, Deferred)
 
     def test_set_volume_deleted_callback(self):
         """Test callback setting."""
@@ -495,7 +474,7 @@ class ClientTestCase(unittest.TestCase):
         self.client.handle_VOLUME_DELETED(message)
 
 
-class RequestTestCase(TwistedTestCase):
+class RequestTestCase(TestCase):
 
     request_class = request.Request
 
@@ -1076,7 +1055,6 @@ class ListPublicFilesTestCase(RequestTestCase):
         # check
         self.assertTrue(self.done_called, 'done() was called')
         node1, node2 = self.request.public_files
-        print("NNNNNNNNNNNNO 1", node1)
 
         self.assertEqual(node1.share_id, 'share_id')
         self.assertEqual(node1.node_id, 'node_id_1')

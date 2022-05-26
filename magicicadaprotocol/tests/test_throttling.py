@@ -27,8 +27,6 @@
 
 """Tests for directory content serialization/unserialization."""
 
-from __future__ import with_statement
-
 from twisted.internet import defer, task
 from twisted.trial.unittest import TestCase as TwistedTestCase
 
@@ -171,11 +169,11 @@ class TestLimitValuesInitialization(BaseThrottlingTestCase):
         """Test read_limit and write_limit with throttling enabled."""
         def check(tscf):
             """Check that there is no delayed calls nor events."""
-            self.assertEquals(2, len(self.clock.getDelayedCalls()))
-            self.assertNotEquals(None, tscf.resetReadThisSecondID)
-            self.assertEquals(None, tscf.unthrottleReadsID)
-            self.assertNotEquals(None, tscf.resetWriteThisSecondID)
-            self.assertEquals(None, tscf.unthrottleWritesID)
+            self.assertEqual(2, len(self.clock.getDelayedCalls()))
+            self.assertNotEqual(None, tscf.resetReadThisSecondID)
+            self.assertEqual(None, tscf.unthrottleReadsID)
+            self.assertNotEqual(None, tscf.resetWriteThisSecondID)
+            self.assertEqual(None, tscf.unthrottleWritesID)
             self.assertEqual(self.client.events, [])
         tscf = self.create_factory(True, read_limit, write_limit)
         check(tscf)
@@ -200,31 +198,31 @@ class TestLimitValuesInitialization(BaseThrottlingTestCase):
         """Test "off" writeLimit value and throttling enabled."""
         tscf = self.create_factory(True, 2, None)
         # check that resetReadThisSecondID is running
-        self.assertEquals(2, len(self.clock.getDelayedCalls()))
-        self.assertNotEquals(None, tscf.resetReadThisSecondID)
-        self.assertEquals(None, tscf.unthrottleReadsID)
-        self.assertNotEquals(None, tscf.resetWriteThisSecondID)
-        self.assertEquals(None, tscf.unthrottleWritesID)
+        self.assertEqual(2, len(self.clock.getDelayedCalls()))
+        self.assertNotEqual(None, tscf.resetReadThisSecondID)
+        self.assertEqual(None, tscf.unthrottleReadsID)
+        self.assertNotEqual(None, tscf.resetWriteThisSecondID)
+        self.assertEqual(None, tscf.unthrottleWritesID)
         tscf.registerRead(4)
         self.clock.advance(0.5)
         self.assertEqual(self.client.events, ["thR"])
-        self.assertNotEquals(None, tscf.resetReadThisSecondID)
-        self.assertNotEquals(None, tscf.unthrottleReadsID)
+        self.assertNotEqual(None, tscf.resetReadThisSecondID)
+        self.assertNotEqual(None, tscf.unthrottleReadsID)
 
     def test_read_None_write_2(self):
         """Test "off" readLimit value and throttling enabled."""
         tscf = self.create_factory(True, None, 2)
         # check that resetWriteThisSecondID is running
-        self.assertEquals(2, len(self.clock.getDelayedCalls()))
-        self.assertNotEquals(None, tscf.resetReadThisSecondID)
-        self.assertEquals(None, tscf.unthrottleReadsID)
-        self.assertNotEquals(None, tscf.resetWriteThisSecondID)
-        self.assertEquals(None, tscf.unthrottleWritesID)
+        self.assertEqual(2, len(self.clock.getDelayedCalls()))
+        self.assertNotEqual(None, tscf.resetReadThisSecondID)
+        self.assertEqual(None, tscf.unthrottleReadsID)
+        self.assertNotEqual(None, tscf.resetWriteThisSecondID)
+        self.assertEqual(None, tscf.unthrottleWritesID)
         tscf.registerWritten(4)
         self.clock.advance(0.5)
         self.assertEqual(self.client.events, ["thW"])
-        self.assertNotEquals(None, tscf.resetWriteThisSecondID)
-        self.assertNotEquals(None, tscf.unthrottleWritesID)
+        self.assertNotEqual(None, tscf.resetWriteThisSecondID)
+        self.assertNotEqual(None, tscf.unthrottleWritesID)
 
     def test_change_to_inavlid(self):
         """Test setting invalid limit values after initialization."""
@@ -240,17 +238,17 @@ class TestResetLoops(BaseThrottlingTestCase):
         """Test the reset loop for reads"""
         tscf = self.create_factory(True, 4, 4)
         tscf.registerRead(4)
-        self.assertEquals(4, tscf.readThisSecond)
+        self.assertEqual(4, tscf.readThisSecond)
         self.clock.advance(1)
-        self.assertEquals(0, tscf.readThisSecond)
+        self.assertEqual(0, tscf.readThisSecond)
 
     def test_write_this_second_loop(self):
         """Test the reset loop for writes"""
         tscf = self.create_factory(True, 4, 4)
         tscf.registerWritten(4)
-        self.assertEquals(4, tscf.writtenThisSecond)
+        self.assertEqual(4, tscf.writtenThisSecond)
         self.clock.advance(1)
-        self.assertEquals(0, tscf.writtenThisSecond)
+        self.assertEqual(0, tscf.writtenThisSecond)
 
 
 class TestCheckBandwidth(BaseThrottlingTestCase):
@@ -261,15 +259,15 @@ class TestCheckBandwidth(BaseThrottlingTestCase):
         tscf = self.create_factory(True, read, write)
         tscf.registerRead(4)
         tscf.registerWritten(4)
-        self.assertEquals(4, tscf.readThisSecond)
-        self.assertEquals(4, tscf.writtenThisSecond)
-        self.assertEquals(None, tscf.unthrottleReadsID)
-        self.assertEquals(None, tscf.unthrottleReadsID)
+        self.assertEqual(4, tscf.readThisSecond)
+        self.assertEqual(4, tscf.writtenThisSecond)
+        self.assertEqual(None, tscf.unthrottleReadsID)
+        self.assertEqual(None, tscf.unthrottleReadsID)
         self.clock.advance(1)
-        self.assertEquals(None, tscf.unthrottleReadsID)
-        self.assertEquals(None, tscf.unthrottleWritesID)
-        self.assertEquals(0, tscf.readThisSecond)
-        self.assertEquals(0, tscf.writtenThisSecond)
+        self.assertEqual(None, tscf.unthrottleReadsID)
+        self.assertEqual(None, tscf.unthrottleWritesID)
+        self.assertEqual(0, tscf.readThisSecond)
+        self.assertEqual(0, tscf.writtenThisSecond)
 
     def test_limits_0(self):
         """Test the check[Read|Wrte]Bandwidth with both = 0."""
@@ -286,18 +284,18 @@ class TestCheckBandwidth(BaseThrottlingTestCase):
         tscf = self.create_factory(True, 2, 2)
         tscf.registerRead(4)
         tscf.registerWritten(4)
-        self.assertEquals(4, tscf.readThisSecond)
-        self.assertEquals(4, tscf.writtenThisSecond)
-        self.assertNotEquals(None, tscf.unthrottleReadsID)
-        self.assertNotEquals(None, tscf.unthrottleReadsID)
+        self.assertEqual(4, tscf.readThisSecond)
+        self.assertEqual(4, tscf.writtenThisSecond)
+        self.assertNotEqual(None, tscf.unthrottleReadsID)
+        self.assertNotEqual(None, tscf.unthrottleReadsID)
         self.clock.advance(.9)
-        self.assertNotEquals(None, tscf.unthrottleReadsID)
-        self.assertNotEquals(None, tscf.unthrottleReadsID)
+        self.assertNotEqual(None, tscf.unthrottleReadsID)
+        self.assertNotEqual(None, tscf.unthrottleReadsID)
         self.clock.advance(.1)
-        self.assertEquals(0, tscf.readThisSecond)
-        self.assertEquals(0, tscf.writtenThisSecond)
-        self.assertEquals(None, tscf.unthrottleReadsID)
-        self.assertEquals(None, tscf.unthrottleWritesID)
+        self.assertEqual(0, tscf.readThisSecond)
+        self.assertEqual(0, tscf.writtenThisSecond)
+        self.assertEqual(None, tscf.unthrottleReadsID)
+        self.assertEqual(None, tscf.unthrottleWritesID)
 
 
 class TestThrottlingLimits(BaseThrottlingTestCase):
@@ -307,7 +305,7 @@ class TestThrottlingLimits(BaseThrottlingTestCase):
         """Test both None and change it to > 0."""
         def check(tscf, events=None, delayed_calls=2):
             """Check that there is no delayed calls nor events."""
-            self.assertEquals(delayed_calls, len(self.clock.getDelayedCalls()))
+            self.assertEqual(delayed_calls, len(self.clock.getDelayedCalls()))
             self.assertEqual(self.client.events, events or [])
         tscf = self.create_factory(True, None, None)
         self.clock.advance(1.1)
@@ -341,7 +339,7 @@ class TestThrottlingLimits(BaseThrottlingTestCase):
         """Test readLimit > 0 and writeLimit = None"""
         tscf = self.create_factory(True, 2, None)
         # check that resetReadThisSecondID is running
-        self.assertEquals(2, len(self.clock.getDelayedCalls()))
+        self.assertEqual(2, len(self.clock.getDelayedCalls()))
         tscf.registerRead(4)
         self.clock.advance(0.9)
         expected_events = ['thR']
@@ -361,7 +359,7 @@ class TestThrottlingLimits(BaseThrottlingTestCase):
         """Test readLimit = None and writeLimit > 0"""
         tscf = self.create_factory(True, None, 2)
         # check that resetReadThisSecondID is running
-        self.assertEquals(2, len(self.clock.getDelayedCalls()))
+        self.assertEqual(2, len(self.clock.getDelayedCalls()))
         tscf.registerWritten(4)
         self.clock.advance(0.9)
         expected_events = ['thW']
@@ -380,7 +378,7 @@ class TestThrottlingLimits(BaseThrottlingTestCase):
     def test_change_read_to_None(self):
         """Test changing the read limit from > 0 to None."""
         tscf = self.create_factory(True, 2, None)
-        self.assertEquals(2, len(self.clock.getDelayedCalls()))
+        self.assertEqual(2, len(self.clock.getDelayedCalls()))
         tscf.registerRead(4)
         expected_events = ['thR']
         self.assertEqual(self.client.events, expected_events)
@@ -398,7 +396,7 @@ class TestThrottlingLimits(BaseThrottlingTestCase):
     def test_change_write_to_None(self):
         """Test changing the write limit from > 0 to None."""
         tscf = self.create_factory(True, None, 2)
-        self.assertEquals(2, len(self.clock.getDelayedCalls()))
+        self.assertEqual(2, len(self.clock.getDelayedCalls()))
         tscf.registerWritten(4)
         expected_events = ['thW']
         self.assertEqual(self.client.events, expected_events)
@@ -420,15 +418,15 @@ class TestEnablement(BaseThrottlingTestCase):
     def test_disabling(self):
         """Tests that disabling throttling at runtime works as expected."""
         tscf = self.create_factory(True, 2, 2)
-        self.assertNotEquals(None, tscf.resetReadThisSecondID)
-        self.assertNotEquals(None, tscf.resetWriteThisSecondID)
+        self.assertNotEqual(None, tscf.resetReadThisSecondID)
+        self.assertNotEqual(None, tscf.resetWriteThisSecondID)
         tscf.registerRead(2)
         tscf.registerWritten(2)
-        self.assertNotEquals(None, tscf.unthrottleReadsID)
-        self.assertNotEquals(None, tscf.unthrottleReadsID)
+        self.assertNotEqual(None, tscf.unthrottleReadsID)
+        self.assertNotEqual(None, tscf.unthrottleReadsID)
         self.clock.advance(1.1)
-        self.assertEquals(None, tscf.unthrottleReadsID)
-        self.assertEquals(None, tscf.unthrottleWritesID)
+        self.assertEqual(None, tscf.unthrottleReadsID)
+        self.assertEqual(None, tscf.unthrottleWritesID)
         tscf.disable_throttling()
         self.assertFalse(tscf.throttling_enabled,
                          "Throttling should be disabled.")
@@ -440,22 +438,22 @@ class TestEnablement(BaseThrottlingTestCase):
     def test_enabling(self):
         """Tests that enabling throttling at runtime works as expected."""
         tscf = self.create_factory(False, 2, 2)
-        self.assertEquals(None, tscf.resetReadThisSecondID)
-        self.assertEquals(None, tscf.resetWriteThisSecondID)
+        self.assertEqual(None, tscf.resetReadThisSecondID)
+        self.assertEqual(None, tscf.resetWriteThisSecondID)
         tscf.registerRead(2)
         tscf.registerWritten(2)
-        self.assertEquals(None, tscf.unthrottleReadsID)
-        self.assertEquals(None, tscf.unthrottleReadsID)
+        self.assertEqual(None, tscf.unthrottleReadsID)
+        self.assertEqual(None, tscf.unthrottleReadsID)
         self.clock.advance(1)
-        self.assertEquals(None, tscf.unthrottleReadsID)
-        self.assertEquals(None, tscf.unthrottleWritesID)
-        self.assertEquals(None, tscf.resetReadThisSecondID)
-        self.assertEquals(None, tscf.resetWriteThisSecondID)
+        self.assertEqual(None, tscf.unthrottleReadsID)
+        self.assertEqual(None, tscf.unthrottleWritesID)
+        self.assertEqual(None, tscf.resetReadThisSecondID)
+        self.assertEqual(None, tscf.resetWriteThisSecondID)
         tscf.enable_throttling()
         self.assertTrue(
             tscf.throttling_enabled, "Throttling should be enabled.")
-        self.assertNotEquals(None, tscf.resetReadThisSecondID)
-        self.assertNotEquals(None, tscf.resetWriteThisSecondID)
+        self.assertNotEqual(None, tscf.resetReadThisSecondID)
+        self.assertNotEqual(None, tscf.resetWriteThisSecondID)
         tscf.registerRead(3)
         tscf.registerWritten(3)
         for delayed in [tscf.unthrottleReadsID, tscf.resetReadThisSecondID,

@@ -69,7 +69,7 @@ class DeltaTestCase(unittest.TestCase):
     def test_correct_attributes(self):
         """Assert over attribute correctness."""
         m = delta.from_message(get_message())
-        self.assert_(isinstance(m, delta.FileInfoDelta))
+        self.assertIsInstance(m, delta.FileInfoDelta)
         self.assertEqual(m.generation, 10)
         self.assertEqual(m.is_live, False)
         self.assertEqual(m.file_type, delta.FILE)
@@ -92,7 +92,7 @@ class DeltaTestCase(unittest.TestCase):
         msg = get_message()
         msg.delta_info.file_info.share = request.ROOT
         m = delta.from_message(msg)
-        self.assert_(isinstance(m, delta.FileInfoDelta))
+        self.assertIsInstance(m, delta.FileInfoDelta)
         self.assertEqual(m.generation, 10)
         self.assertEqual(m.is_live, False)
         self.assertEqual(m.file_type, delta.FILE)

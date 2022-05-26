@@ -72,7 +72,7 @@ class BaseTimestampChecker(object):
                 self.next_check = local_time + self.CHECKING_INTERVAL
                 self.skew = server_time - local_time
                 log_debug("Calculated server-local time skew:", self.skew)
-            except Exception, e:
+            except Exception as e:
                 log_debug("Error while verifying the server time skew:", e)
                 self.next_check = local_time + self.ERROR_INTERVAL
         log_debug("Using corrected timestamp:",

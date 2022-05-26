@@ -46,7 +46,7 @@ def is_valid_node(node_id):
     """
     try:
         return str(UUID(node_id)) == node_id
-    except StandardError:
+    except Exception:
         return False
 
 

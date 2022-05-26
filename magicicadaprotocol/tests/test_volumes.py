@@ -64,10 +64,10 @@ class VolumeTestCase(unittest.TestCase):
 
     def assert_correct_attributes(self):
         """Assert over attribute correctness."""
-        self.assertEquals(self.volume_id, self.volume.volume_id)
-        self.assertEquals(NODE, self.volume.node_id)
-        self.assertEquals(FREE_BYTES, self.volume.free_bytes)
-        self.assertEquals(GENERATION, self.volume.generation)
+        self.assertEqual(self.volume_id, self.volume.volume_id)
+        self.assertEqual(NODE, self.volume.node_id)
+        self.assertEqual(FREE_BYTES, self.volume.free_bytes)
+        self.assertEqual(GENERATION, self.volume.generation)
 
     def test_creation(self):
         """Test creation."""
@@ -90,15 +90,15 @@ class VolumeTestCase(unittest.TestCase):
     def test_is_equal(self):
         """Test object equality."""
         other = copy(self.volume)
-        self.assertEquals(other, self.volume)
+        self.assertEqual(other, self.volume)
 
-        for attr, value in self.kwargs.iteritems():
+        for attr, value in self.kwargs.items():
             setattr(other, attr, None)
-            self.assertNotEquals(other, self.volume,
-                                 'not equal when %s differ' % attr)
+            self.assertNotEqual(
+                other, self.volume, 'not equal when %s differ' % attr)
             setattr(other, attr, value)
 
-        self.assertEquals(other, self.volume)
+        self.assertEqual(other, self.volume)
 
 
 class ShareTestCase(VolumeTestCase):
@@ -118,12 +118,12 @@ class ShareTestCase(VolumeTestCase):
     def assert_correct_attributes(self):
         """Assert over attribute correctness."""
         super(ShareTestCase, self).assert_correct_attributes()
-        self.assertEquals(self.to_me, self.volume.direction)
-        self.assertEquals(NAME, self.volume.share_name)
-        self.assertEquals(USER, self.volume.other_username)
-        self.assertEquals(USER, self.volume.other_visible_name)
-        self.assertEquals(False, self.volume.accepted)
-        self.assertEquals(self.only_view, self.volume.access_level)
+        self.assertEqual(self.to_me, self.volume.direction)
+        self.assertEqual(NAME, self.volume.share_name)
+        self.assertEqual(USER, self.volume.other_username)
+        self.assertEqual(USER, self.volume.other_visible_name)
+        self.assertEqual(False, self.volume.accepted)
+        self.assertEqual(self.only_view, self.volume.access_level)
 
     def test_from_msg(self):
         """Test creation using from_msg."""
@@ -150,7 +150,7 @@ class UDFTestCase(VolumeTestCase):
     def assert_correct_attributes(self):
         """Assert over attribute correctness."""
         super(UDFTestCase, self).assert_correct_attributes()
-        self.assertEquals(PATH, self.volume.suggested_path)
+        self.assertEqual(PATH, self.volume.suggested_path)
 
     def test_from_msg(self):
         """Test creation using from_msg."""
