@@ -34,21 +34,18 @@ from magicicadaprotocol.client import MultiQuery
 
 
 class TestQuery10(unittest.TestCase):
-    """
-    Check that MultiQuery works using an iterator
-    """
+    """Check that MultiQuery works using an iterator."""
+
     N = 10
 
     def test_query_many(self):
-        """
-        Check the lenght is right. Not much more we can compare, is there?
-        """
+        """Check the lenght is right, there isn't much more to compare."""
         # larger than real ids and hashes, and also randomer than real, so we
         # can get away with creating less queries per Query
-        a_id = os.urandom(1024)
-        b_id = os.urandom(1024)
-        a_hash = os.urandom(1024)
-        items = [(a_id, b_id, a_hash) for _ in xrange(self.N)]
+        a_id = str(os.urandom(1024))
+        b_id = str(os.urandom(1024))
+        a_hash = str(os.urandom(1024))
+        items = [(a_id, b_id, a_hash) for _ in range(self.N)]
         multi_query_list = MultiQuery(None, items)
         multi_query_iter = MultiQuery(None, iter(items))
         self.assertEqual(len(multi_query_list.queries),
@@ -56,7 +53,6 @@ class TestQuery10(unittest.TestCase):
 
 
 class TestQuery1000(TestQuery10):
-    """
-    Check with even more queries
-    """
+    """Check with even more queries."""
+
     N = 1000

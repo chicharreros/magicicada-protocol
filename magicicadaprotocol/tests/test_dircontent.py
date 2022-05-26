@@ -77,23 +77,15 @@ class TestFilenames(TestCase):
 class TestDirContent(TestCase):
     """Tests for Directory content serialization/unserialization."""
 
-    def setUp(self):
-        """Set up a test."""
-        pass
-
-    def tearDown(self):
-        """Tear down a test."""
-        pass
-
     def testDirEntryEquality(self):
         """Verify that DirEntry equality tests work."""
         a = DirEntry(name=u"a", node_type=FILE, uuid="some-id")
         a2 = DirEntry(name=u"a", node_type=FILE, uuid="some-id")
         b = DirEntry(name=u"b", node_type=FILE, uuid="other-id")
-        self.assert_(a == a)
-        self.assert_(a == a2)
-        self.assert_(a != b)
-        self.assert_(a is not None)
+        self.assertEqual(a, a)
+        self.assertEqual(a, a2)
+        self.assertNotEqual(a, b)
+        self.assertIsNotNone(a)
 
     def testEntryName(self):
         """Verify that name and utf8_name are encoded and decoded properly."""
@@ -104,12 +96,13 @@ class TestDirContent(TestCase):
         for entry in [a, b]:
             self.assertEqual(entry.name, unicode_name)
             self.assertEqual(entry.utf8_name, utf8_name)
-            self.assert_(isinstance(entry.name, unicode))
-            self.assert_(isinstance(entry.utf8_name, str))
+            self.assertIsInstance(entry.name, unicode)
+            self.assertIsInstance(entry.utf8_name, str)
 
     def testRoundtrip(self):
-        """Verifies that directory entries roundtrip successfully, and in
-        correct (sorted) order.
+        """Verify that directory entries roundtrip successfully
+
+        And in correct (sorted) order.
 
         """
         a = DirEntry(name=u"negatory", node_type=FILE, uuid="abcd")

@@ -39,6 +39,7 @@ from magicicadaprotocol.proxy_tunnel import ProxyTunnelFactory
 
 class FakeTransport(StringTransport):
     """Fake transport"""
+
     def __init__(self, reply_func, remote_func=None):
         """Initialization for fake transport"""
         StringTransport.__init__(self)

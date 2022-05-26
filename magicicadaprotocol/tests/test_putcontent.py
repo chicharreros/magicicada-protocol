@@ -31,7 +31,6 @@ import unittest
 
 from StringIO import StringIO
 
-from mocker import Mocker, ANY
 from twisted.test.proto_helpers import StringTransport
 
 from magicicadaprotocol import protocol_pb2, request
@@ -48,57 +47,39 @@ class TestOffset(unittest.TestCase):
         self.protocol.transport = transport
 
     def test_offset(self):
-        """
-        Test that, if the server's BEGIN_CONTENT message specifies an offset,
-        the file to be uploaded is seek'ed to the right position.
-        """
-        offset = 23
-        mocker = Mocker()
-        transport = mocker.mock()
-        transport.registerProducer(ANY, streaming=True)
-        transport.write(ANY)
-        mocker.count(1, None)  # I don't really care how many times
-        fd = mocker.mock()
-        fd.seek(offset)  # this is really all I care about
-        fd.read(ANY)
-        mocker.result('')
-        mocker.replay()
-
+        """On BEGIN_CONTENT, the file is seek'ed to the offset from the msg."""
         protocol = StorageClient()
-        protocol.transport = transport
+        protocol.transport = StringTransport()
+        protocol.max_payload_size = 20
+
+        fd = StringIO(
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
         pc = PutContent(protocol, 'share', 'node', '', '', 0, 0, 0, fd)
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.BEGIN_CONTENT
-        message.begin_content.offset = offset
+        message.begin_content.offset = offset = 23
         pc.start()
         pc.processMessage(message)
+
+        self.assertEqual(fd.tell(), offset + protocol.max_payload_size)
 
     def test_offset_none(self):
-        """
-        Test that, if the server's BEGIN_CONTENT message does *not* specify an
-        offset, the file to be uploaded is seek'ed to the right position.
-        """
-        mocker = Mocker()
-        transport = mocker.mock()
-        transport.registerProducer(ANY, streaming=True)
-        transport.write(ANY)
-        mocker.count(1, None)  # I don't really care how many times
-        fd = mocker.mock()
-        fd.seek(0)  # this is really all I care about
-        fd.read(ANY)
-        mocker.result('')
-        mocker.replay()
-
+        """On BEGIN_CONTENT, the file is seek'ed to 0 pos when no offset."""
         protocol = StorageClient()
-        protocol.transport = transport
+        protocol.transport = StringTransport()
+        protocol.max_payload_size = 10
+
+        fd = StringIO()
         pc = PutContent(protocol, 'share', 'node', '', '', 0, 0, 0, fd)
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.BEGIN_CONTENT
         pc.start()
         pc.processMessage(message)
 
+        self.assertEqual(fd.tell(), 0)
+
     def test_callback(self):
-        """Test that, if the server specify an offset, we call back with it."""
+        """If the server specify an offset, we call back with it."""
         upload_id = 'foo'
         offset = 123456
         called = []
@@ -137,30 +118,6 @@ class TestUploadId(unittest.TestCase):
         pc.processMessage(message)
         self.assertEqual(len(called), 1)
         self.assertEqual(called[0], ('foo', 0))
-
-    def test_server_upload_id_no_cb(self):
-        """Test that, if the server specify an upload_id, we save it.
-
-        Only if we have the upload_id_cb defined.
-        """
-        offset = 23
-        # just to check something
-        mocker = Mocker()
-        fd = mocker.mock()
-        fd.seek(offset)  # this is really all I care about
-        fd.read(ANY)
-        mocker.result('')
-        mocker.replay()
-
-        upload_id = "foo"
-        pc = PutContent(self.protocol, 'share', 'node', '', '',
-                        0, 0, 0, fd)
-        message = protocol_pb2.Message()
-        message.type = protocol_pb2.Message.BEGIN_CONTENT
-        message.begin_content.upload_id = upload_id
-        message.begin_content.offset = offset
-        pc.start()
-        pc.processMessage(message)
 
     def test_server_upload_id_none(self):
         """Test that if there is no upload_id we ignore it."""
