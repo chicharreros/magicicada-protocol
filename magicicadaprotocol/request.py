@@ -370,7 +370,7 @@ class Request:
         """remove the reference to self from the request handler"""
         self.finished = True
         self.started = False
-        self.protocol.requests.pop(self.id, None)
+        del self.protocol.requests[self.id]
         self.protocol.removeProducer(self)
 
     def sendMessage(self, message):
