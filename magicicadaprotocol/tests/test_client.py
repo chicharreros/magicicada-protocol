@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2015-2022 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
@@ -29,8 +27,7 @@
 
 """Tests for the protocol client."""
 
-import StringIO
-import os
+import io
 import sys
 import uuid
 
@@ -61,12 +58,12 @@ from magicicadaprotocol.client import (
 from magicicadaprotocol.tests import test_delta_info
 
 
-PATH = u'~/Documents/pdfs/moño/'
-NAME = u'UDF-me'
+PATH = '~/Documents/pdfs/moño/'
+NAME = 'UDF-me'
 VOLUME = uuid.UUID('12345678-1234-1234-1234-123456789abc')
 SHARE = uuid.UUID('33333333-1234-1234-1234-123456789abc')
 NODE = uuid.UUID('FEDCBA98-7654-3211-2345-6789ABCDEF12')
-USER = u'Dude'
+USER = 'Dude'
 GENERATION = 999
 PUBLIC_URL = "http://magicicada/someid"
 
@@ -136,7 +133,7 @@ def set_share_message(message):
     message.share.share_id = str(VOLUME)
     message.share.direction = 0
     message.share.subtree = str(NODE)
-    message.share.share_name = u'test'
+    message.share.share_name = 'test'
     message.share.other_username = USER
     message.share.other_visible_name = USER
     message.share.accepted = False
@@ -145,24 +142,6 @@ def set_share_message(message):
 
 def noop_callback(*a):
     """No op callback."""
-
-
-class MethodMock(object):
-    """A class to overwrite methods to know if they were called.
-
-    @ivar called: boolean, true if the class was called
-    @ivar call_count: int, the number of calls
-    """
-
-    def __init__(self):
-        """Create the mock."""
-        self.called = False
-        self.call_count = 0
-
-    def __call__(self):
-        """Update call stats."""
-        self.called = True
-        self.call_count += 1
 
 
 class DummyAttribute(object):
@@ -478,12 +457,16 @@ class RequestTestCase(TestCase):
 
     request_class = request.Request
 
-    @defer.inlineCallbacks
-    def setUp(self):
-        yield super(RequestTestCase, self).setUp()
-        import types
-        self.request_class = types.ClassType(self.request_class.__name__,
-                                             (self.request_class,), {})
+    def make_request(self, *args, protocol=None, start=True, **kwargs):
+        if protocol is None:
+            protocol = FakedProtocol()
+        request = self.request_class(protocol, *args, **kwargs)
+        self.done_called = False
+        request.deferred.addCallbacks(
+            was_called(self, 'done_called'), faked_error)
+        if start:
+            request.start()
+        return request
 
 
 class CreateUDFTestCase(RequestTestCase):
@@ -495,11 +478,7 @@ class CreateUDFTestCase(RequestTestCase):
     def setUp(self):
         """Initialize testing protocol."""
         yield super(CreateUDFTestCase, self).setUp()
-        self.protocol = FakedProtocol()
-        self.request = self.request_class(self.protocol, path=PATH, name=NAME)
-        self.request.error = faked_error
-        self.done_called = False
-        self.request.done = was_called(self, 'done_called')
+        self.request = self.make_request(path=PATH, name=NAME)
 
     def test_init(self):
         """Test request creation."""
@@ -510,18 +489,23 @@ class CreateUDFTestCase(RequestTestCase):
 
     def test_start(self):
         """Test request start."""
-        self.request.start()
+        request = self.make_request('path', 'name', start=False)
 
-        self.assertEqual(1, len(self.request.protocol.messages))
-        actual_msg, = self.request.protocol.messages
+        request.start()
+
+        self.assertEqual(1, len(request.protocol.messages))
+        actual_msg, = request.protocol.messages
         self.assertEqual(protocol_pb2.Message.CREATE_UDF, actual_msg.type)
-        self.assertEqual(self.request.path, actual_msg.create_udf.path)
-        self.assertEqual(self.request.name, actual_msg.create_udf.name)
+        self.assertEqual(request.path, actual_msg.create_udf.path)
+        self.assertEqual(request.name, actual_msg.create_udf.name)
 
+    @defer.inlineCallbacks
     def test_process_message_error(self):
         """Test request processMessage on error."""
         message = protocol_pb2.Message()
-        self.assertRaises(FakedError, self.request.processMessage, message)
+        self.request.processMessage(message)
+        with self.assertRaises(FakedError):
+            yield self.request.deferred
 
     def test_process_message_volume_created(self):
         """Test request processMessage on sucess."""
@@ -546,11 +530,7 @@ class ListVolumesTestCase(RequestTestCase):
     def setUp(self):
         """Initialize testing protocol."""
         yield super(ListVolumesTestCase, self).setUp()
-        self.protocol = FakedProtocol()
-        self.request = self.request_class(self.protocol)
-        self.request.error = faked_error
-        self.done_called = False
-        self.request.done = was_called(self, 'done_called')
+        self.request = self.make_request()
 
     def test_init(self):
         """Test request creation."""
@@ -558,16 +538,21 @@ class ListVolumesTestCase(RequestTestCase):
 
     def test_start(self):
         """Test request start."""
-        self.request.start()
+        request = self.make_request(start=False)
 
-        self.assertEqual(1, len(self.request.protocol.messages))
-        actual_msg, = self.request.protocol.messages
+        request.start()
+
+        self.assertEqual(1, len(request.protocol.messages))
+        actual_msg, = request.protocol.messages
         self.assertEqual(protocol_pb2.Message.LIST_VOLUMES, actual_msg.type)
 
+    @defer.inlineCallbacks
     def test_process_message_error(self):
         """Test request processMessage on error."""
         message = protocol_pb2.Message()
-        self.assertRaises(FakedError, self.request.processMessage, message)
+        self.request.processMessage(message)
+        with self.assertRaises(FakedError):
+            yield self.request.deferred
 
     def test_process_message_volume_created(self):
         """Test request processMessage on sucess."""
@@ -598,18 +583,20 @@ class ListVolumesTestCase(RequestTestCase):
 
     def test_start_cleanups_volumes(self):
         """Test start() is idempotent."""
-        self.request.start()
+        request = self.make_request(start=False)
+
+        request.start()
 
         message = build_list_volumes()
         set_udf_message(message.list_volumes)
-        self.request.processMessage(message)
+        request.processMessage(message)
 
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.VOLUMES_END
-        self.request.processMessage(message)
+        request.processMessage(message)
 
-        self.request.start()
-        self.assertEqual([], self.request.volumes)
+        request.start()
+        self.assertEqual([], request.volumes)
 
 
 class DeleteVolumeTestCase(RequestTestCase):
@@ -621,11 +608,7 @@ class DeleteVolumeTestCase(RequestTestCase):
     def setUp(self):
         """Initialize testing protocol."""
         yield super(DeleteVolumeTestCase, self).setUp()
-        self.protocol = FakedProtocol()
-        self.request = self.request_class(self.protocol, volume_id=VOLUME)
-        self.request.error = faked_error
-        self.done_called = False
-        self.request.done = was_called(self, 'done_called')
+        self.request = self.make_request(volume_id=VOLUME)
 
     def test_init(self):
         """Test request creation."""
@@ -633,18 +616,23 @@ class DeleteVolumeTestCase(RequestTestCase):
 
     def test_start(self):
         """Test request start."""
-        self.request.start()
+        request = self.make_request('volume_id', start=False)
 
-        self.assertEqual(1, len(self.request.protocol.messages))
-        actual_msg, = self.request.protocol.messages
+        request.start()
+
+        self.assertEqual(1, len(request.protocol.messages))
+        actual_msg, = request.protocol.messages
         self.assertEqual(protocol_pb2.Message.DELETE_VOLUME, actual_msg.type)
-        self.assertEqual(self.request.volume_id,
-                         actual_msg.delete_volume.volume)
+        self.assertEqual(
+            request.volume_id, actual_msg.delete_volume.volume)
 
+    @defer.inlineCallbacks
     def test_process_message_error(self):
         """Test request processMessage on error."""
         message = protocol_pb2.Message()
-        self.assertRaises(FakedError, self.request.processMessage, message)
+        self.request.processMessage(message)
+        with self.assertRaises(FakedError):
+            yield self.request.deferred
 
     def test_process_message_ok(self):
         """Test request processMessage on sucess."""
@@ -664,11 +652,7 @@ class GetDeltaTestCase(RequestTestCase):
     def setUp(self):
         """Initialize testing protocol."""
         yield super(GetDeltaTestCase, self).setUp()
-        self.protocol = FakedProtocol()
-        self.request = self.request_class(self.protocol, SHARE, 0)
-        self.request.error = faked_error
-        self.done_called = False
-        self.request.done = was_called(self, 'done_called')
+        self.request = self.make_request(SHARE, 0)
 
     def test_init(self):
         """Test request creation."""
@@ -676,18 +660,22 @@ class GetDeltaTestCase(RequestTestCase):
 
     def test_start(self):
         """Test request start."""
-        self.request.start()
+        request = self.make_request('share_id', from_scratch=True, start=False)
 
-        self.assertEqual(1, len(self.request.protocol.messages))
-        actual_msg, = self.request.protocol.messages
+        request.start()
+
+        self.assertEqual(1, len(request.protocol.messages))
+        actual_msg, = request.protocol.messages
         self.assertEqual(protocol_pb2.Message.GET_DELTA, actual_msg.type)
-        self.assertEqual(self.request.share_id,
-                         actual_msg.get_delta.share)
+        self.assertEqual(request.share_id, actual_msg.get_delta.share)
 
+    @defer.inlineCallbacks
     def test_process_message_error(self):
         """Test request processMessage on error."""
         message = protocol_pb2.Message()
-        self.assertRaises(FakedError, self.request.processMessage, message)
+        self.request.processMessage(message)
+        with self.assertRaises(FakedError):
+            yield self.request.deferred
 
     def test_process_message_ok(self):
         """Test request processMessage on sucess."""
@@ -722,24 +710,21 @@ class GetDeltaTestCase(RequestTestCase):
     def test_process_message_content_callback(self):
         """Test request processMessage for content w/callback."""
         response = []
-        self.request = GetDelta(self.protocol, SHARE, 0,
-                                callback=response.append)
+        self.request = self.make_request(SHARE, 0, callback=response.append)
         message = test_delta_info.get_message()
         self.request.processMessage(message)
         self.assertTrue(delta.from_message(message) in response)
 
     def test_from_scratch_flag(self):
         """Test from scratch flag."""
-        self.request = self.request_class(self.protocol, SHARE, 0,
-                                          from_scratch=True)
-        self.request.done = was_called(self, 'done_called')
-        self.request.start()
+        request = self.make_request(SHARE, 0, from_scratch=True, start=False)
 
-        self.assertEqual(1, len(self.request.protocol.messages))
-        actual_msg, = self.request.protocol.messages
+        request.start()
+
+        self.assertEqual(1, len(request.protocol.messages))
+        actual_msg, = request.protocol.messages
         self.assertEqual(protocol_pb2.Message.GET_DELTA, actual_msg.type)
-        self.assertEqual(self.request.share_id,
-                         actual_msg.get_delta.share)
+        self.assertEqual(request.share_id, actual_msg.get_delta.share)
 
 
 class TestAuth(RequestTestCase):
@@ -750,13 +735,12 @@ class TestAuth(RequestTestCase):
     def test_session_id(self):
         """Test that the request has the session id attribute."""
         SESSION_ID = "opaque_session_id"
-        req = self.request_class(FakedProtocol(), None)
-        req.done = MethodMock()
+        req = self.make_request({})
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.AUTH_AUTHENTICATED
         message.session_id = SESSION_ID
         req.processMessage(message)
-        self.assert_(req.done.called)
+        self.assertTrue(self.done_called)
         self.assertEqual(req.session_id, SESSION_ID)
 
     def test_with_metadata(self):
@@ -834,7 +818,7 @@ class TestGenerationInRequests(RequestTestCase):
 
     def build_request(self):
         """Creates the request object."""
-        return self.request_class(FakedProtocol(), None, None, "name")
+        return self.make_request("share", "parent_id", "name")
 
     def build_message(self):
         """Creates the ending message for the request."""
@@ -846,10 +830,9 @@ class TestGenerationInRequests(RequestTestCase):
     def test_make(self):
         """Test the request for new_generation."""
         req = self.build_request()
-        req.done = MethodMock()
         message = self.build_message()
         req.processMessage(message)
-        self.assert_(req.done.called)
+        self.assertTrue(self.done_called)
         self.assertEqual(req.new_generation, GENERATION)
 
 
@@ -873,8 +856,8 @@ class TestGenerationInRequestsPutContent(TestGenerationInRequests):
 
     def build_request(self):
         """Creates the request object."""
-        return self.request_class(
-            FakedProtocol(), None, None, None, None, None, None, None, None)
+        return self.make_request(
+            'share', 'node', 'previous_hash', 'new_hash', 123, 456, 789, 'fd')
 
     def build_message(self):
         """Creates the ending message for the request."""
@@ -891,7 +874,7 @@ class TestGenerationInRequestsUnlink(TestGenerationInRequestsPutContent):
 
     def build_request(self):
         """Creates the request object."""
-        return self.request_class(FakedProtocol(), None, None)
+        return self.make_request('share', 'node')
 
 
 class TestGenerationInRequestsMove(TestGenerationInRequestsPutContent):
@@ -901,7 +884,7 @@ class TestGenerationInRequestsMove(TestGenerationInRequestsPutContent):
 
     def build_request(self):
         """Creates the request object."""
-        return self.request_class(FakedProtocol(), None, None, None, None)
+        return self.make_request('share', 'node', 'new_parent', 'new_name')
 
 
 class PutContentTestCase(RequestTestCase):
@@ -909,40 +892,33 @@ class PutContentTestCase(RequestTestCase):
 
     request_class = PutContent
 
+    def build_request(self, protocol=None):
+        """Creates the request object."""
+        return self.make_request(
+            'share', 'node', 'previous_hash', 'new_hash', 123, 456, 789, 'fd',
+            protocol=protocol)
+
     def test_max_payload_size(self):
         """Get the value from the protocol."""
-        self.protocol = FakedProtocol()
-        assert 12345 != self.protocol.max_payload_size
-        self.protocol.max_payload_size = 12345
-        pc = PutContent(self.protocol, None, None, None, None,
-                        None, None, None, None)
+        protocol = FakedProtocol()
+        assert 12345 != protocol.max_payload_size
+        protocol.max_payload_size = 12345
+        pc = self.build_request(protocol)
         self.assertEqual(pc.max_payload_size, 12345)
 
     def test_bytesmessageproducer_maxpayloadsize(self):
         """The producer uses the payload size from the request."""
-        # set up the PutContent
-        pc = self.request_class(
-            FakedProtocol(), None, None, None, None, None, None, None, None)
-        assert 12345 != pc.max_payload_size
-        pc.max_payload_size = 12345
+        pc = self.build_request()
+        assert 12 != pc.max_payload_size
+        pc.max_payload_size = 12
 
-        # set up the producer
-        fake_file = StringIO.StringIO(os.urandom(100000))
+        # set up the producer with a content with size 19
+        fake_file = io.BytesIO(b"some binary content")
         producer = BytesMessageProducer(pc, fake_file, 0)
         producer.producing = True
 
-        # set up a function to check and go!
-        d = Deferred()
-
-        def check(message):
-            """Check."""
-            self.assertEqual(len(message.bytes.bytes), 12345)
-            producer.producing = False
-            d.callback(True)
-
-        pc.sendMessage = check
         producer.go()
-        return d
+        self.assertEqual(fake_file.tell(), 12)
 
 
 class ChangePublicAccessTestCase(RequestTestCase):
@@ -954,12 +930,8 @@ class ChangePublicAccessTestCase(RequestTestCase):
     def setUp(self):
         """Initialize testing protocol."""
         yield super(ChangePublicAccessTestCase, self).setUp()
-        self.protocol = FakedProtocol()
-        self.request = self.request_class(
-            self.protocol, share_id=SHARE, node_id=NODE, is_public=True)
-        self.request.error = faked_error
-        self.done_called = False
-        self.request.done = was_called(self, 'done_called')
+        self.request = self.make_request(
+            share_id=SHARE, node_id=NODE, is_public=True)
 
     def test_init(self):
         """Test request creation."""
@@ -969,22 +941,28 @@ class ChangePublicAccessTestCase(RequestTestCase):
 
     def test_start(self):
         """Test request start."""
-        self.request.start()
+        request = self.make_request(
+            share_id=SHARE, node_id=NODE, is_public=True, start=False)
 
-        self.assertEqual(1, len(self.request.protocol.messages))
-        actual_msg, = self.request.protocol.messages
-        self.assertEqual(actual_msg.type,
-                         protocol_pb2.Message.CHANGE_PUBLIC_ACCESS)
-        self.assertEqual(actual_msg.change_public_access.share,
-                         self.request.share_id)
-        self.assertEqual(actual_msg.change_public_access.node,
-                         self.request.node_id)
+        request.start()
+
+        self.assertEqual(1, len(request.protocol.messages))
+        actual_msg, = request.protocol.messages
+        self.assertEqual(
+            actual_msg.type, protocol_pb2.Message.CHANGE_PUBLIC_ACCESS)
+        self.assertEqual(
+            actual_msg.change_public_access.share, request.share_id)
+        self.assertEqual(
+            actual_msg.change_public_access.node, request.node_id)
         self.assertTrue(actual_msg.change_public_access.is_public)
 
+    @defer.inlineCallbacks
     def test_process_message_error(self):
         """Test request processMessage on error."""
         message = protocol_pb2.Message()
-        self.assertRaises(FakedError, self.request.processMessage, message)
+        self.request.processMessage(message)
+        with self.assertRaises(FakedError):
+            yield self.request.deferred
         self.assertIsNone(self.request.public_url)
 
     def test_process_message_ok(self):
@@ -1007,25 +985,26 @@ class ListPublicFilesTestCase(RequestTestCase):
     def setUp(self):
         """Initialize testing protocol."""
         yield super(ListPublicFilesTestCase, self).setUp()
-        self.protocol = FakedProtocol()
-        self.request = self.request_class(self.protocol)
-        self.request.error = faked_error
-        self.done_called = False
-        self.request.done = was_called(self, 'done_called')
+        self.request = self.make_request()
 
     def test_start(self):
         """Test request start."""
-        self.request.start()
+        request = self.make_request(start=False)
 
-        self.assertEqual(1, len(self.request.protocol.messages))
-        actual_msg, = self.request.protocol.messages
-        self.assertEqual(actual_msg.type,
-                         protocol_pb2.Message.LIST_PUBLIC_FILES)
+        request.start()
 
+        self.assertEqual(1, len(request.protocol.messages))
+        actual_msg, = request.protocol.messages
+        self.assertEqual(
+            actual_msg.type, protocol_pb2.Message.LIST_PUBLIC_FILES)
+
+    @defer.inlineCallbacks
     def test_process_message_error(self):
         """Test request processMessage on error."""
         message = protocol_pb2.Message()
-        self.assertRaises(FakedError, self.request.processMessage, message)
+        self.request.processMessage(message)
+        with self.assertRaises(FakedError):
+            yield self.request.deferred
         self.assertEqual(self.request.public_files, [])
 
     def test_process_message_ok(self):

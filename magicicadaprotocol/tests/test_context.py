@@ -70,7 +70,7 @@ class FakeCerts(object):
         fullpath = os.path.join(self.cert_dir, filename)
         if os.path.exists(fullpath):
             os.unlink(fullpath)
-        with open(fullpath, 'wt') as fd:
+        with open(fullpath, 'wb') as fd:
             fd.write(data)
         return fullpath
 
@@ -108,7 +108,7 @@ class FakeResource(resource.Resource):
 
     def render(self, request):
         """Render this resource."""
-        return "ok"
+        return b"ok"
 
 
 class SSLContextTestCase(unittest.TestCase):
@@ -120,18 +120,17 @@ class SSLContextTestCase(unittest.TestCase):
         site = server.Site(FakeResource())
         port = reactor.listenSSL(0, site, server_context)
         self.addCleanup(port.stopListening)
-        url = "https://localhost:%d" % port.getHost().port
+        url = b"https://localhost:%d" % port.getHost().port
         result = yield client.getPage(url, contextFactory=client_context)
-        self.assertEqual(result, "ok")
+        self.assertEqual(result, b"ok")
 
     @defer.inlineCallbacks
     def assert_cert_failed_verify(self, server_context, client_context):
         d = self.verify_context(server_context, client_context)
         e = yield self.assertFailure(d, SSL.Error)
-        self.assertEqual(len(e.message), 1)
-        expected = ('SSL routines', 'tls_process_server_certificate',
-                    'certificate verify failed')
-        self.assertEqual(e.message[0], expected)
+        self.assertEqual(len(e.args), 1)
+        expected = [('SSL routines', '', 'certificate verify failed')]
+        self.assertEqual(e.args[0], expected)
 
     @defer.inlineCallbacks
     def test_no_verify(self):
@@ -209,6 +208,7 @@ class CertLoadingTestCase(unittest.TestCase):
     def test_use_all_certificates_and_fail(self):
         """Use system installed certificates and fail checking self-signed."""
         certs = FakeCerts(self, "localhost")
+        os.environ['SSL_CERTIFICATES_DIR'] = certs.cert_dir
         server_context = ssl.DefaultOpenSSLContextFactory(
             certs.server_key_path, certs.server_cert_path)
         client_context = context.get_ssl_context(no_verify=False,
@@ -216,10 +216,6 @@ class CertLoadingTestCase(unittest.TestCase):
         site = server.Site(FakeResource())
         port = reactor.listenSSL(0, site, server_context)
         self.addCleanup(port.stopListening)
-        url = "https://localhost:%d" % port.getHost().port
-        try:
-            yield client.getPage(url, contextFactory=client_context)
-        except SSL.Error:
-            return
-        else:
-            self.fail("Should fail with SSL Error.")
+        url = b"https://localhost:%d" % port.getHost().port
+        yield self.assertFailure(
+            client.getPage(url, contextFactory=client_context), SSL.Error)

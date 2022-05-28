@@ -27,8 +27,6 @@
 
 """Tests for directory content serialization/unserialization."""
 
-from __future__ import with_statement
-
 import uuid
 
 from twisted.internet import defer
@@ -131,7 +129,7 @@ class TestRequest(TwistedTestCase):
         self.patch(self.request, 'error',
                    lambda error: setattr(self, 'error', error))
 
-        for code_error, proto_error in errors._error_mapping.iteritems():
+        for code_error, proto_error in errors._error_mapping.items():
             message = protocol_pb2.Message()
             message.type = protocol_pb2.Message.ERROR
             message.error.type = code_error

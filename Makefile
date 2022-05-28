@@ -35,7 +35,7 @@ $(ENV): $(ENV)/bin/activate
 
 # only runs when requirements.txt or requirements-devel.txt changes
 $(ENV)/bin/activate: deps requirements.txt requirements-devel.txt
-	test -d $(ENV) || virtualenv -p python2 $(ENV)
+	test -d $(ENV) || virtualenv -p python3 $(ENV)
 	$(ENV)/bin/pip install -U pip setuptools
 	$(ENV)/bin/pip install -Ur requirements.txt -Ur requirements-devel.txt
 	touch $(ENV)/bin/activate
@@ -55,11 +55,11 @@ test: lint
 	SSL_CERTIFICATES_DIR=$(SRC_DIR)/tests/certs PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python $(ENV)/bin/trial magicicadaprotocol
 
 clean:
-	$(PYTHON) setup.py clean
+	$(PYTHON) setup.py clean || true
 	find -name '*.pyc' -delete
-	rm -rf build dist sdist _trial_temp magicicadaprotocol.egg-info
+	rm -rf build dist sdist _trial_temp magicicadaprotocol.egg-info $(ENV)
 
-lint: $(ENV)
+lint: $(ENV) build
 	$(ENV)/bin/flake8 --filename='*.py' --exclude='$(ENV),*_pb2.py,build'
 
 .PHONY: build bdist upload test lint

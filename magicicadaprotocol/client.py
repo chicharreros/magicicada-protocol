@@ -1067,7 +1067,7 @@ class Move(request.Request):
             self._default_process_message(message)
 
 
-class MultiQuery(object):
+class MultiQuery:
     """Create a Request-like object that encapsulates many Query requests
 
     We may need to split this request into many Query rests if the list of
@@ -1167,7 +1167,7 @@ class Query(request.Request):
             self._default_process_message(message)
 
 
-class BytesMessageProducer(object):
+class BytesMessageProducer:
     """Produce BYTES messages from a file."""
 
     # to allow patching this in test and use task.Clock
@@ -1773,7 +1773,7 @@ class ThrottlingStorageClientFactory(StorageClientFactory, object):
             self.throttleReads()
             throttle_time = self._get_throttle_time(self.readThisSecond,
                                                     self.readLimit)
-            log_debug("pause reads for: %s", str(throttle_time))
+            log_debug("pause reads for: %s", throttle_time)
             self.unthrottleReadsID = self.maybeCallLater(
                 'unthrottleReadsID', throttle_time, self.unthrottleReads)
 
@@ -1788,7 +1788,7 @@ class ThrottlingStorageClientFactory(StorageClientFactory, object):
             self.throttleWrites()
             throttle_time = self._get_throttle_time(self.writtenThisSecond,
                                                     self.writeLimit)
-            log_debug("pause writes for: %s", str(throttle_time))
+            log_debug("pause writes for: %s", throttle_time)
             self.unthrottleWritesID = self.maybeCallLater(
                 'unthrottleWritesID', throttle_time, self.unthrottleWrites)
 

@@ -34,11 +34,11 @@ from twisted.internet import reactor, ssl
 
 
 class ProxyTunnelClient(Protocol):
-    """ Protocol to tunnel connections through a https proxy using
-    the connect method.
+    """Tunnel connections through a https proxy using the connect method.
 
     We send the command, do the auth and then proxy our calls to the
     original protocol.
+
     """
     MAX_LINE_LEN = 2 ** 14
 
@@ -50,10 +50,14 @@ class ProxyTunnelClient(Protocol):
         self.message = None
         self.status = None
 
+    def write_line(self, line=''):
+        line += '\r\n'
+        self.transport.write(line.encode("utf8"))
+
     def sendHeader(self, name, value):
         """Send a header."""
-        line = '%s: %s\r\n' % (name, value)
-        self.transport.write(line)
+        line = '%s: %s' % (name, value)
+        self.write_line(line)
 
     def connectionLost(self, reason=connectionDone):
         """The connection was lost."""
@@ -66,18 +70,25 @@ class ProxyTunnelClient(Protocol):
         """Connection was established."""
         self.negotiation_done = False
         self.client_protocol = None
-        self.__buffer = ""
+        self.__buffer = b""
         # send request
-        line = "CONNECT %s:%s HTTP/1.0\r\n"
-        self.transport.write(line % (self.factory.host, self.factory.port))
+        line = "CONNECT %s:%s HTTP/1.0" % (
+            self.factory.host, self.factory.port)
+        self.write_line(line)
         # send headers
         self.sendHeader("Host", self.factory.host)
         # do auth
         user = self.factory.user
         if user is not None:
-            auth_str = base64.b64encode("%s:%s" % (user, self.factory.passwd))
-            self.sendHeader("Proxy-Authorization", "Basic %s" % auth_str)
-        self.transport.write("\r\n")
+            if isinstance(user, str):
+                user = user.encode('utf8')
+            passwd = self.factory.passwd
+            if isinstance(passwd, str):
+                passwd = passwd.encode('utf8')
+            auth_bytes = base64.b64encode(b"%s:%s" % (user, passwd))
+            self.sendHeader(
+                "Proxy-Authorization", "Basic %s" % auth_bytes.decode("utf8"))
+        self.write_line()
 
     def error(self, reason):
         """Got an error."""
@@ -93,7 +104,7 @@ class ProxyTunnelClient(Protocol):
 
             while not self.negotiation_done:
                 try:
-                    line, self.__buffer = self.__buffer.split("\r\n", 1)
+                    line, self.__buffer = self.__buffer.split(b"\r\n", 1)
                 except ValueError:
                     if len(self.__buffer) > self.MAX_LINE_LEN:
                         self.error("Error in proxy negotiation: Line too long")
@@ -108,21 +119,22 @@ class ProxyTunnelClient(Protocol):
     def lineReceived(self, line):
         """Received a line."""
         if line:
-            parts = line.split(" ", 2)
+            parts = line.split(b" ", 2)
             version, status = parts[:2]
             if len(parts) == 3:
                 message = parts[2]
             else:
-                message = ""
+                message = b""
             self.status = status
             self.message = message
         else:
-            if self.status == "200":
+            if self.status == b"200":
                 self.negotiation_done = True
                 self.start()
             else:
-                self.error("Error in proxy negotiation: " +
-                           self.status + " " + self.message)
+                self.error(
+                    "Error in proxy negotiation: %s %s" %
+                    (self.status, self.message))
 
     def start(self):
         """Start doing stuf."""

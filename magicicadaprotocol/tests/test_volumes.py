@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2015-2022 Chicharreros (https://launchpad.net/~chicharreros)
 #
 # This program is free software: you can redistribute it and/or modify it
@@ -36,11 +34,11 @@ from copy import copy
 
 from magicicadaprotocol import protocol_pb2, volumes
 
-PATH = u'~/Documents/pdfs/moño/'
-NAME = u'What a beatiful volume'
+PATH = '~/Documents/pdfs/moño/'
+NAME = 'What a beatiful volume'
 VOLUME = uuid.UUID('12345678-1234-1234-1234-123456789abc')
 NODE = uuid.UUID('FEDCBA98-7654-3211-2345-6789ABCDEF12')
-USER = u'dude'
+USER = 'dude'
 FREE_BYTES = 1024
 GENERATION = 999
 
@@ -128,8 +126,8 @@ class ShareTestCase(VolumeTestCase):
     def test_from_msg(self):
         """Test creation using from_msg."""
         message = protocol_pb2.Shares()
-        message.share_id = str(VOLUME)
-        message.subtree = str(NODE)
+        message.share_id = str(VOLUME).encode('utf8')
+        message.subtree = str(NODE).encode('utf8')
         message.generation = GENERATION
         message.free_bytes = FREE_BYTES
         message.share_name = NAME
@@ -155,8 +153,8 @@ class UDFTestCase(VolumeTestCase):
     def test_from_msg(self):
         """Test creation using from_msg."""
         message = protocol_pb2.UDFs()
-        message.volume = str(VOLUME)
-        message.node = str(NODE)
+        message.volume = str(VOLUME).encode('utf8')
+        message.node = str(NODE).encode('utf8')
         message.suggested_path = PATH
         message.generation = GENERATION
         message.free_bytes = FREE_BYTES

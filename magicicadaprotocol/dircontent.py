@@ -27,11 +27,12 @@
 
 """Standard routines for working with directory content."""
 
+import operator
 import re
 
 from magicicadaprotocol.dircontent_pb2 import DirectoryContent
 
-ILLEGAL_FILENAMES = [u".", u".."]
+ILLEGAL_FILENAMES = [".", ".."]
 ILLEGAL_FILENAME_CHARS_RE_SOURCE = r'[\000/]'
 ILLEGAL_FILENAME_CHARS_RE = re.compile(ILLEGAL_FILENAME_CHARS_RE_SOURCE)
 
@@ -41,26 +42,32 @@ class InvalidFilename(Exception):
 
 
 def validate_filename(filename):
-    """Validates a filename for use with the storage service; raises
-    InvalidFilename if the filename is invalid."""
-    if type(filename) != unicode:
+    """Validate a filename for use with the storage service.
+
+    Raises InvalidFilename if the filename is invalid.
+
+    """
+    if type(filename) != str:
         raise InvalidFilename("Filename is not unicode")
     if filename in ILLEGAL_FILENAMES:
-        raise InvalidFilename(u"%s is a reserved filename" % (filename,))
+        raise InvalidFilename("%s is a reserved filename" % (filename,))
     if ILLEGAL_FILENAME_CHARS_RE.search(filename) is not None:
-        raise InvalidFilename(u"%s contains illegal characters" % (filename,))
+        raise InvalidFilename("%s contains illegal characters" % (filename,))
 
 
 def normalize_filename(filename):
-    """Takes a unicode filename and returns the normalized form,
-    raising InvalidFilename if the filename is invalid for use with
-    the storage service."""
+    """Take a filename and return the normalized form.
+
+    Raise InvalidFilename if the filename is invalid for use with the storage
+    service.
+
+    """
     validate_filename(filename)
     return filename
 
 
 def parse_dir_content(stream):
-    """Unserializes directory content from a stream.
+    """Unserialize directory content from a stream.
 
     @param stream: an IO-alike stream object
     @return: a generator yielding DirEntry objects
@@ -76,11 +83,6 @@ def parse_dir_content(stream):
                        uuid=entry.node)
 
 
-def by_utf8_name(entry_a, entry_b):
-    """Compares two entries by the UTF-8 form of their names."""
-    return cmp(entry_a.utf8_name, entry_b.utf8_name)
-
-
 def write_dir_content(entries, stream):
     """Takes a sequence of DirEntry objects, sorts them, and writes
     the corresponding serialized directory content to the given stream.
@@ -89,7 +91,7 @@ def write_dir_content(entries, stream):
     @param stream: an IO-compatible stream to write to
 
     """
-    sorted_entries = sorted(entries, by_utf8_name)
+    sorted_entries = sorted(entries, key=operator.attrgetter('utf8_name'))
     for chunk in yield_presorted_dir_content(sorted_entries):
         stream.write(chunk)
 
@@ -116,10 +118,10 @@ def yield_presorted_dir_content(sorted_entries):
         yield content.SerializeToString()
 
 
-class DirEntry(object):
+class DirEntry:
     """An object representing a directory entry.
 
-    name: the node's name in the directory as a unicode string
+    name: the node's name in the directory as a string
     utf8_name: the node's name encoded in UTF-8
     node_type: the node's type (one of FILE, DIRECTORY, or SYMLINK)
     uuid: the node's server-side UUID

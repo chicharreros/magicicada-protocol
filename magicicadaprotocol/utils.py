@@ -39,7 +39,7 @@ from twisted.web import http
 log_debug = partial(log.msg, loglevel=logging.DEBUG)
 
 
-class BaseTimestampChecker(object):
+class BaseTimestampChecker:
     """A timestamp that's regularly checked with a server."""
 
     CHECKING_INTERVAL = 60 * 60  # in seconds

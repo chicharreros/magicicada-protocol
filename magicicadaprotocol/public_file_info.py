@@ -28,7 +28,7 @@
 """Wrapper class for public file information."""
 
 
-class PublicFileInfo(object):
+class PublicFileInfo:
     """Hold the public file object information."""
 
     def __init__(self, share_id, node_id, is_public, public_url):

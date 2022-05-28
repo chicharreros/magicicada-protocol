@@ -62,21 +62,21 @@ class ShareResponseFromParamsTest(TestCase):
 
     def test_to_me(self):
         """Test ShareResponse.from_params with a 'to_me' share."""
-        args = (uuid.uuid4(), "to_me", uuid.uuid4(), "share_name", u"username",
-                u"visible_name", True, self.access_level)
+        args = (uuid.uuid4(), "to_me", uuid.uuid4(), "share_name", "username",
+                "visible_name", True, self.access_level)
         share = ShareResponse.from_params(*args)
         self.assertShareResponse(share, args)
 
     def test_to_me_with_volume(self):
         """Test ShareResponse.from_params with a 'to_me' share."""
-        args = (uuid.uuid4(), "to_me", uuid.uuid4(), "share_name", u"username",
-                u"visible_name", True, self.access_level, uuid.uuid4())
+        args = (uuid.uuid4(), "to_me", uuid.uuid4(), "share_name", "username",
+                "visible_name", True, self.access_level, uuid.uuid4())
         self.assertRaises(ValueError, ShareResponse.from_params, *args)
 
     def test_from_me(self):
         """Test ShareResponse.from_params with a 'from_me' share."""
         args = (uuid.uuid4(), "from_me", uuid.uuid4(), "share_name",
-                u"username", u"visible_name", True, self.access_level,
+                "username", "visible_name", True, self.access_level,
                 uuid.uuid4())
         share = ShareResponse.from_params(*args)
         self.assertShareResponse(share, args)
@@ -84,7 +84,7 @@ class ShareResponseFromParamsTest(TestCase):
     def test_from_me_without_volume(self):
         """Test ShareResponse.from_params with a 'from_me' share."""
         args = (uuid.uuid4(), "from_me", uuid.uuid4(), "share_name",
-                u"username", u"visible_name", True, self.access_level)
+                "username", "visible_name", True, self.access_level)
         share = ShareResponse.from_params(*args)
         self.assertShareResponse(share, args)
 
@@ -112,8 +112,8 @@ class ShareResponseFromToMsgTest(TestCase):
 
     def test_to_me(self):
         """Test ShareResponse.from_params with a 'to_me' share."""
-        args = (uuid.uuid4(), "to_me", uuid.uuid4(), "share_name", u"username",
-                u"visible_name", True, self.access_level)
+        args = (uuid.uuid4(), "to_me", uuid.uuid4(), "share_name", "username",
+                "visible_name", True, self.access_level)
         share = ShareResponse.from_params(*args)
         share.dump_to_msg(self.msg.shares)
         self.assertEqualShare(share,
@@ -121,8 +121,8 @@ class ShareResponseFromToMsgTest(TestCase):
 
     def test_to_me_with_volume(self):
         """Test ShareResponse.from_params with a 'to_me' share."""
-        args = (uuid.uuid4(), "to_me", uuid.uuid4(), "share_name", u"username",
-                u"visible_name", True, self.access_level)
+        args = (uuid.uuid4(), "to_me", uuid.uuid4(), "share_name", "username",
+                "visible_name", True, self.access_level)
         share = ShareResponse.from_params(*args)
         share.dump_to_msg(self.msg.shares)
         self.msg.shares.subtree_volume_id = str(uuid.uuid4())
@@ -132,7 +132,7 @@ class ShareResponseFromToMsgTest(TestCase):
     def test_from_me(self):
         """Test ShareResponse.from_params with a 'from_me' share."""
         args = (uuid.uuid4(), "from_me", uuid.uuid4(), "share_name",
-                u"username", u"visible_name", True, self.access_level,
+                "username", "visible_name", True, self.access_level,
                 uuid.uuid4())
         share = ShareResponse.from_params(*args)
         share.dump_to_msg(self.msg.shares)
@@ -142,7 +142,7 @@ class ShareResponseFromToMsgTest(TestCase):
     def test_from_me_without_volume(self):
         """Test ShareResponse.from_params with a 'from_me' share."""
         args = (uuid.uuid4(), "from_me", uuid.uuid4(), "share_name",
-                u"username", u"visible_name", True, self.access_level)
+                "username", "visible_name", True, self.access_level)
         share = ShareResponse.from_params(*args)
         share.dump_to_msg(self.msg.shares)
         self.assertEqualShare(share,

@@ -85,9 +85,9 @@ class ContentHashingTests(unittest.TestCase):
 
     def test_hashing_content_once(self):
         """Test the hashing for some content sent once."""
-        self.hasher.update("foobar")
+        self.hasher.update(b"foobar")
         r = self.hasher.hexdigest()
-        s = hashlib.sha1("foobar").hexdigest()
+        s = hashlib.sha1(b"foobar").hexdigest()
         self.assertEqual(r, s)
 
     def test_hashing_content_upadting(self):
@@ -102,7 +102,7 @@ class ContentHashingTests(unittest.TestCase):
 
     def test_content_hash(self):
         """The hexdigest with the prefix."""
-        self.hasher.update("foobar")
+        self.hasher.update(b"foobar")
         hexdigest = self.hasher.hexdigest()
         ch = self.hasher.content_hash()
         self.assertEqual("sha1:" + hexdigest, ch)
@@ -118,14 +118,14 @@ class MagicHashingTests(unittest.TestCase):
     def test_hashing_empty(self):
         """Test the hashing for no data."""
         r = self.hasher.hash_object.hexdigest()
-        s = hashlib.sha1("Ubuntu One").hexdigest()
+        s = hashlib.sha1(b"Ubuntu One").hexdigest()
         self.assertEqual(r, s)
 
     def test_hashing_content_once(self):
         """Test the hashing for some content sent once."""
-        self.hasher.update("foobar")
+        self.hasher.update(b"foobar")
         r = self.hasher.hash_object.hexdigest()
-        s = hashlib.sha1("Ubuntu Onefoobar").hexdigest()
+        s = hashlib.sha1(b"Ubuntu Onefoobar").hexdigest()
         self.assertEqual(r, s)
 
     def test_hashing_content_upadting(self):
@@ -135,7 +135,7 @@ class MagicHashingTests(unittest.TestCase):
         self.hasher.update(c1)
         self.hasher.update(c2)
         r = self.hasher.hash_object.hexdigest()
-        s = hashlib.sha1("Ubuntu One" + c1 + c2).hexdigest()
+        s = hashlib.sha1(b"Ubuntu One" + c1 + c2).hexdigest()
         self.assertEqual(r, s)
 
     def test_hexdigest_hiding(self):
@@ -148,12 +148,12 @@ class MagicHashingTests(unittest.TestCase):
 
     def test_content_hash_hiding(self):
         """The content hash is not the content hash!"""
-        self.hasher.update("foobar")
+        self.hasher.update(b"foobar")
         hexdigest = self.hasher.hash_object.hexdigest()
         ch = self.hasher.content_hash()
 
         # not a string, and never show the content
-        self.assertFalse(isinstance(ch, basestring))
+        self.assertFalse(isinstance(ch, str))
         self.assertFalse(hexdigest in str(ch))
         self.assertFalse(hexdigest in repr(ch))
 

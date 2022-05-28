@@ -7,5 +7,5 @@ protobuf
 # can perform only rudimentary TLS client hostname verification.  Many valid
 # certificate/hostname mappings may be rejected.
 service_identity
-twisted
+twisted[tls]==21.7.0
 zope.interface

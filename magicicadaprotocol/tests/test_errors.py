@@ -45,12 +45,12 @@ class ErrorsTestCase(unittest.TestCase):
 
     def test_exceptions_are_storage_protocol_error(self):
         """High level exceptions inherit from StorageProtocolError."""
-        for e, args in HIGH_LEVEL_ERRORS.iteritems():
+        for e, args in HIGH_LEVEL_ERRORS.items():
             self.assertIsInstance(e(**args), errors.StorageProtocolError)
 
     def test_mapping(self):
         """Protocol's specific exceptions are correct."""
-        for code_error, proto_error in errors._error_mapping.iteritems():
+        for code_error, proto_error in errors._error_mapping.items():
             self.assertIsInstance(
                 proto_error(**REQ_ARGS), errors.StorageRequestError)
             self.assertEqual(
