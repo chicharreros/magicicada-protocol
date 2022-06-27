@@ -30,6 +30,7 @@
 import io
 import sys
 import uuid
+from collections import defaultdict
 
 from twisted.application import internet, service
 from twisted.internet import defer
@@ -159,11 +160,19 @@ class FakedProtocol(StorageClient):
         """Override transports and keep track of messages."""
         StorageClient.__init__(self, *args, **kwargs)
         self.transport = DummyAttribute()
-        self.messages = []
+        self.recorder = defaultdict(list)
+
+    @property
+    def messages(self):
+        return self.recorder['sent']
 
     def sendMessage(self, message):
         """Keep track of messages."""
-        self.messages.append(message)
+        self.recorder['sent'].append(message)
+
+    def processMessage(self, message):
+        """Keep track of messages."""
+        self.recorder['received'].append(message)
 
 
 class ClientTestCase(TestCase):
@@ -179,6 +188,17 @@ class ClientTestCase(TestCase):
         """Get the value from the constant at init time."""
         self.assertEqual(self.client.max_payload_size,
                          request.MAX_PAYLOAD_SIZE)
+
+    def test_data_received_index_error(self):
+        self.client.dataReceived(b'foo bar')
+        self.assertEqual(self.client.recorder, {})
+
+    def test_data_received_handles_bytes(self):
+        protocol_version = b'\r\n\x00\x00\x00\x08\x08\x01\x10\x05"\x02\x08\x03'
+        self.client.dataReceived(protocol_version)
+        messages = self.client.recorder['received']
+        self.assertEqual(len(messages), 1)
+        self.assertIsInstance(messages[0], protocol_pb2.Message)
 
     # client to server
     def test_client_get_delta(self):
