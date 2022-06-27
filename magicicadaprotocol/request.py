@@ -66,11 +66,12 @@ ROOT = ''
 
 @implementer(IPushProducer)
 class RequestHandler(Protocol):
-    """the base class for a network peer.
+    """The base class for a network peer.
 
     @cvar REQUEST_ID_START:  the request id starting number. replace this in
     client subclasses. servers should start at 0, clients should start at 1.
     @cvar PROTOCOL_VERSION: the protocol version for this peer.
+
     """
 
     SIZE, MESSAGE = range(2)
@@ -88,7 +89,7 @@ class RequestHandler(Protocol):
         self.producing = True
 
     def get_new_request_id(self):
-        """get a new and unused request id."""
+        """Get a new and unused request id."""
         # register this request id
         request_id = self.request_counter
         # we increment the request counter by two;
@@ -114,14 +115,14 @@ class RequestHandler(Protocol):
                 continue
 
     def addProducer(self, who):
-        """add self as a producer as we have new requests."""
+        """Add self as a producer as we have new requests."""
         if not self.requests:
             self.transport.registerProducer(self, streaming=True)
         if self.producing:
             who.resumeProducing()
 
     def removeProducer(self, who):
-        "remove self as producer if there are no more requests."
+        "Remove self as producer if there are no more requests."
         if not self.requests:
             self.transport.unregisterProducer()
 
@@ -144,7 +145,7 @@ class RequestHandler(Protocol):
         self.producing = False
 
     def dataReceived(self, data):
-        """handle new data."""
+        """Handle new data."""
         try:
             self.buildMessage(data)
         except StorageProtocolError as e:
@@ -153,15 +154,15 @@ class RequestHandler(Protocol):
             print("ERROR:", e)
 
     def write(self, data):
-        """transport API to capture bytes written"""
+        """Transport API to capture bytes written."""
         self.transport.write(data)
 
     def writeSequence(self, data):
-        """transport API to capture bytes written in a sequence"""
+        """Transport API to capture bytes written in a sequence."""
         self.transport.writeSequence(data)
 
     def buildMessage(self, data):
-        """create messages from data received."""
+        """Create messages from data received."""
         # more parts for the old message
         while len(data) > self.pending_length:
             # split and create a new message
@@ -175,7 +176,7 @@ class RequestHandler(Protocol):
 
             if self.pending_length == 0:
                 # we have a finished message
-                buf = "".join(self.pending_parts)
+                buf = b"".join(self.pending_parts)
                 self.pending_parts = []
                 if self.waiting_for == self.SIZE:
                     # send an error if size is too big, close connection
@@ -196,7 +197,7 @@ class RequestHandler(Protocol):
                     self.processMessage(message)
 
     def processMessage(self, message):
-        """ process an incoming message.
+        """Process an incoming message.
 
         if this message is part of an active request, we just tell the request
         to handle the message.

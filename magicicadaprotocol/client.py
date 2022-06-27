@@ -94,7 +94,7 @@ class StorageClient(request.RequestHandler):
         if self.line_mode:
             # first read the hello line, then back to binary.
             try:
-                pos = data.index("\r\n")
+                pos = data.index(b"\r\n")
             except ValueError:
                 return
             self.line_mode = False
