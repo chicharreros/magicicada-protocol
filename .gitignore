@@ -2,4 +2,6 @@
 .env
 _trial_temp
 build
+dist
 magicicadaprotocol/*_pb2.py
+magicicadaprotocol.egg-info
