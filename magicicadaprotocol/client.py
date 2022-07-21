@@ -637,7 +637,7 @@ class GetContent(request.Request):
                 self.done()
                 return
             if self.callback is None:
-                self.data = "".join(self.parts)
+                self.data = b"".join(self.parts)
             self.done()
         elif message.type == protocol_pb2.Message.OK:
             self.done()
