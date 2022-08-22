@@ -2,10 +2,11 @@
 line-length = 79
 skip-string-normalization = true
 exclude = '''
-/(
+(
     \.git
-  | .env
+  | \.env
   | build
-  | \*_pb2.py
-)/
+  | magicicadaprotocol/dircontent_pb2\.py
+  | magicicadaprotocol/protocol_pb2\.py
+)
 '''
