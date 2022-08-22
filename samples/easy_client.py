@@ -39,10 +39,8 @@ import zlib
 from twisted.internet import reactor, defer
 
 from magicicadaprotocol import request, protocol_pb2
-from magicicadaprotocol.client import (
-    StorageClientFactory, StorageClient)
-from magicicadaprotocol.dircontent_pb2 import (
-    DirectoryContent, DIRECTORY)
+from magicicadaprotocol.client import StorageClientFactory, StorageClient
+from magicicadaprotocol.dircontent_pb2 import DirectoryContent, DIRECTORY
 
 
 class NotDirectory(Exception):
@@ -55,16 +53,18 @@ def delay_time(step):
 
 
 def retry(function):
-    """This function will be retried when it raises TRY_AGAIN from the server.
-    """
+    """Retry this function when it raises TRY_AGAIN from the server."""
+
     def inner(self, *args, **kwargs):
         """decorated."""
 
         def do_retry(failure, step):
             """retry."""
-            if failure.check(request.StorageRequestError) \
-                    and failure.value.error_message.error.type == \
-                    protocol_pb2.Error.TRY_AGAIN:
+            if (
+                failure.check(request.StorageRequestError)
+                and failure.value.error_message.error.type
+                == protocol_pb2.Error.TRY_AGAIN
+            ):
                 print("retry", args)
                 d = defer.Deferred()
                 reactor.callLater(delay_time(step), d.callback, None)
@@ -73,9 +73,11 @@ def retry(function):
                 return d
             else:
                 return failure
+
         d = function(self, *args, **kwargs)
         d.addErrback(do_retry, 0)
         return d
+
     return inner
 
 
@@ -95,6 +97,7 @@ class EasyClient(StorageClient):
 
     def _get_hash(self, node_id):
         """Get the hash of node_id."""
+
         def _got_query(query):
             """deferred part."""
             message = query[0][1].response[0]
@@ -142,6 +145,7 @@ class EasyClient(StorageClient):
                         print("is directory", entry)
                         return entry.node
                 raise NotDirectory("name %s is not a directory" % name)
+
             d.addCallback(is_directory)
             return d
 
@@ -157,14 +161,14 @@ class EasyClient(StorageClient):
         """make a file named name in cwd."""
         d = self.get_cwd_id()
         d.addCallback(
-            lambda _: self.make_file(request.ROOT, self.cwd_id, name))
+            lambda _: self.make_file(request.ROOT, self.cwd_id, name)
+        )
         return d
 
     def mkdir(self, name):
         """make a dir named name in cwd."""
         d = self.get_cwd_id()
-        d.addCallback(
-            lambda _: self.make_dir(request.ROOT, self.cwd_id, name))
+        d.addCallback(lambda _: self.make_dir(request.ROOT, self.cwd_id, name))
         return d
 
     def put(self, name, content):
@@ -196,6 +200,7 @@ class EasyClient(StorageClient):
             for entry in unserialized_content.entries:
                 result.append(entry)
             return result
+
         d.addCallback(make_listdir)
         return d
 
@@ -207,6 +212,7 @@ class EasyClient(StorageClient):
 
 class EasyClientFactory(StorageClientFactory):
     """A test oriented protocol factory."""
+
     protocol = EasyClient
 
     def __init__(self, deferrer):
@@ -241,14 +247,17 @@ def authenticated_client(host, port, token="open sesame"):
         d = client.dummy_authenticate(token)
         d.addCallback(lambda _: client_obj)
         return d
+
     d.addCallback(auth)
     return d
 
 
 def skip_error(failure, error):
     """try: except $error: pass errback"""
-    if failure.check(request.StorageRequestError) and \
-            failure.value.error_message.error.type == error:
+    if (
+        failure.check(request.StorageRequestError)
+        and failure.value.error_message.error.type == error
+    ):
         return
     else:
         return failure
@@ -292,11 +301,13 @@ if __name__ == "__main__":
         """Make files."""
         d = client_obj.chdir("%s" % (number))
         for i in range(0, num_files):
-            d.addCallback(skip_result, log, "Client %s creating file %s."
-                          % (number, i))
+            d.addCallback(
+                skip_result, log, "Client %s creating file %s." % (number, i)
+            )
             d.addCallback(skip_result, client.mkfile, "%s" % (i))
-            d.addCallback(skip_result, log, "Client %s created file %s."
-                          % (number, i))
+            d.addCallback(
+                skip_result, log, "Client %s created file %s." % (number, i)
+            )
         return d
 
     NUM_CLIENTS = 200

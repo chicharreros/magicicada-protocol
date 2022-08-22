@@ -41,9 +41,21 @@ file_type_registry = {
 class FileInfoDelta:
     """Hold the file/directory object information for a delta."""
 
-    def __init__(self, generation, is_live, file_type, parent_id,
-                 share_id, node_id, name, is_public, content_hash,
-                 crc32, size, last_modified):
+    def __init__(
+        self,
+        generation,
+        is_live,
+        file_type,
+        parent_id,
+        share_id,
+        node_id,
+        name,
+        is_public,
+        content_hash,
+        crc32,
+        size,
+        last_modified,
+    ):
         self.generation = generation
         self.is_live = is_live
         self.file_type = file_type
@@ -76,7 +88,8 @@ class FileInfoDelta:
             content_hash=info.content_hash,
             crc32=info.crc32,
             size=info.size,
-            last_modified=info.last_modified)
+            last_modified=info.last_modified,
+        )
         return result
 
     def __eq__(self, other):
@@ -87,7 +100,8 @@ class FileInfoDelta:
 
 
 message_type_registry = {
-    protocol_pb2.DeltaInfo.FILE_INFO: FileInfoDelta.from_message}
+    protocol_pb2.DeltaInfo.FILE_INFO: FileInfoDelta.from_message
+}
 
 
 def from_message(message):

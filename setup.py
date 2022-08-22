@@ -35,8 +35,10 @@ class StorageProtocolBuild(build.build):
         """Do the build"""
         protoc = find_executable("protoc")
         if protoc is None:
-            sys.stderr.write("*** Cannot find protoc; is the protobuf-compiler"
-                             " package installed?\n")
+            sys.stderr.write(
+                "*** Cannot find protoc; is the protobuf-compiler"
+                " package installed?\n"
+            )
             sys.exit(-1)
 
         for source in glob.glob('magicicadaprotocol/*.proto'):
@@ -70,7 +72,8 @@ setup(
     version='3.0.3',
     description=(
         'The protocol implementation for the Magicicada filesync server '
-        '(open source fork of the Ubuntu One filesync).'),
+        '(open source fork of the Ubuntu One filesync).'
+    ),
     # From twisted - UserWarning: You do not have a working installation of the
     # service_identity module: 'No module named service_identity'.  Please
     # install it from <https://pypi.python.org/pypi/service_identity> and make
@@ -78,9 +81,12 @@ setup(
     # module, Twisted can perform only rudimentary TLS client hostname
     # verification. Many valid certificate/hostname mappings may be rejected.
     install_requires=[
-        'pyOpenSSL', 'protobuf', 'service_identity', 'twisted',
-        'zope.interface'],
+        'pyOpenSSL',
+        'protobuf',
+        'service_identity',
+        'twisted',
+        'zope.interface',
+    ],
     packages=find_packages(),
-    cmdclass={'build': StorageProtocolBuild,
-              'clean': StorageProtocolClean},
+    cmdclass={'build': StorageProtocolBuild, 'clean': StorageProtocolClean},
 )

@@ -31,13 +31,19 @@ from io import BytesIO
 from unittest import TestCase
 
 from magicicadaprotocol.dircontent import (
-    parse_dir_content, write_dir_content, DirEntry,
-    normalize_filename, validate_filename, InvalidFilename)
+    parse_dir_content,
+    write_dir_content,
+    DirEntry,
+    normalize_filename,
+    validate_filename,
+    InvalidFilename,
+)
 from magicicadaprotocol.dircontent_pb2 import DIRECTORY, FILE
 
 
 class TestFilenames(TestCase):
     """Tests for filename validation and normalization."""
+
     def test_trivial(self):
         """Tests the trivial case of an ASCII filename."""
         self.assertEqual('foobar', normalize_filename('foobar'))

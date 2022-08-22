@@ -46,8 +46,11 @@ class FakeRequest(object):
 
     def sendMessage(self, message):
         """Store the message in own list."""
-        name = protocol_pb2.Message.DESCRIPTOR.enum_types_by_name[
-            'MessageType'].values_by_number[message.type].name
+        name = (
+            protocol_pb2.Message.DESCRIPTOR.enum_types_by_name['MessageType']
+            .values_by_number[message.type]
+            .name
+        )
         self.messages.append(name)
 
 

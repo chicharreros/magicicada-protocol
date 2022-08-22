@@ -98,7 +98,8 @@ class StorageClient(request.RequestHandler):
             except ValueError:
                 return
             self.line_mode = False
-            data = data[pos + 2:]
+            skip = pos + 2
+            data = data[skip:]
 
         request.RequestHandler.dataReceived(self, data)
 
@@ -109,8 +110,7 @@ class StorageClient(request.RequestHandler):
         object when completed.
 
         """
-        p = Authenticate(self, {'dummy_token': credentials},
-                         metadata=metadata)
+        p = Authenticate(self, {'dummy_token': credentials}, metadata=metadata)
         p.start()
         return p.deferred
 
@@ -165,8 +165,10 @@ class StorageClient(request.RequestHandler):
             elif msg.type == protocol_pb2.Volumes.UDF:
                 vol = volumes.UDFVolume.from_msg(msg.udf)
             else:
-                msg = "Message.volume_created's type is not valid: %s" % \
-                      message.volume_created.type
+                msg = (
+                    "Message.volume_created's type is not valid: %s"
+                    % message.volume_created.type
+                )
                 raise TypeError(msg)
 
             self._volume_created_callback(vol)
@@ -247,51 +249,106 @@ class StorageClient(request.RequestHandler):
         p.start()
         return p.deferred
 
-    def get_content(self, share, node, a_hash, offset=0,
-                    callback=None, node_attr_callback=None):
+    def get_content(
+        self,
+        share,
+        node,
+        a_hash,
+        offset=0,
+        callback=None,
+        node_attr_callback=None,
+    ):
         """Get the content of node with 'a_hash'.
 
         the content will be on request.content
         or callback will be called for every piece that arrives.
 
         """
-        req = self.get_content_request(share, node, a_hash, offset,
-                                       callback, node_attr_callback)
+        req = self.get_content_request(
+            share, node, a_hash, offset, callback, node_attr_callback
+        )
         return req.deferred
 
-    def get_content_request(self, share, node, a_hash, offset=0,
-                            callback=None, node_attr_callback=None):
+    def get_content_request(
+        self,
+        share,
+        node,
+        a_hash,
+        offset=0,
+        callback=None,
+        node_attr_callback=None,
+    ):
         """Get the content of node with 'a_hash', return the request.
 
         The content will be on request.content, or callback will be
         called for every piece that arrives.
 
         """
-        p = GetContent(self, share, node, a_hash, offset,
-                       callback, node_attr_callback)
+        p = GetContent(
+            self, share, node, a_hash, offset, callback, node_attr_callback
+        )
         p.start()
         return p
 
-    def put_content(self, share, node, previous_hash, new_hash,
-                    crc32, size, deflated_size, fd, upload_id=None,
-                    upload_id_cb=None, magic_hash=None):
+    def put_content(
+        self,
+        share,
+        node,
+        previous_hash,
+        new_hash,
+        crc32,
+        size,
+        deflated_size,
+        fd,
+        upload_id=None,
+        upload_id_cb=None,
+        magic_hash=None,
+    ):
         """Put the content of fd into file node."""
-        req = self.put_content_request(share, node, previous_hash, new_hash,
-                                       crc32, size, deflated_size, fd,
-                                       upload_id=upload_id,
-                                       upload_id_cb=upload_id_cb,
-                                       magic_hash=magic_hash)
+        req = self.put_content_request(
+            share,
+            node,
+            previous_hash,
+            new_hash,
+            crc32,
+            size,
+            deflated_size,
+            fd,
+            upload_id=upload_id,
+            upload_id_cb=upload_id_cb,
+            magic_hash=magic_hash,
+        )
         return req.deferred
 
-    def put_content_request(self, share, node, previous_hash, new_hash,
-                            crc32, size, deflated_size, fd, upload_id=None,
-                            upload_id_cb=None, magic_hash=None):
+    def put_content_request(
+        self,
+        share,
+        node,
+        previous_hash,
+        new_hash,
+        crc32,
+        size,
+        deflated_size,
+        fd,
+        upload_id=None,
+        upload_id_cb=None,
+        magic_hash=None,
+    ):
         """Put the content of fd into file node, return the request."""
-        p = PutContent(self, share, node, previous_hash, new_hash,
-                       crc32, size, deflated_size, fd,
-                       upload_id=upload_id,
-                       upload_id_cb=upload_id_cb,
-                       magic_hash=magic_hash)
+        p = PutContent(
+            self,
+            share,
+            node,
+            previous_hash,
+            new_hash,
+            crc32,
+            size,
+            deflated_size,
+            fd,
+            upload_id=upload_id,
+            upload_id_cb=upload_id_cb,
+            magic_hash=magic_hash,
+        )
         p.start()
         return p
 
@@ -305,8 +362,9 @@ class StorageClient(request.RequestHandler):
         r.start()
         return r.deferred
 
-    def get_delta(self, share_id, from_generation=None, callback=None,
-                  from_scratch=False):
+    def get_delta(
+        self, share_id, from_generation=None, callback=None, from_scratch=False
+    ):
         """Get a delta for a share_id
 
         'share_id' is the share_id which we want to query.
@@ -348,8 +406,9 @@ class StorageClient(request.RequestHandler):
 
         """
         if self._node_state_callback:
-            self._node_state_callback(node_state.share, node_state.node,
-                                      node_state.hash)
+            self._node_state_callback(
+                node_state.share, node_state.node, node_state.hash
+            )
 
     def set_free_space_callback(self, callback):
         """Set the quota notification callback.
@@ -367,8 +426,9 @@ class StorageClient(request.RequestHandler):
 
         """
         if self._free_space_callback:
-            self._free_space_callback(free_space_info.share_id,
-                                      free_space_info.free_bytes)
+            self._free_space_callback(
+                free_space_info.share_id, free_space_info.free_bytes
+            )
 
     def set_account_info_callback(self, callback):
         """Set the account info notification callback; the callback
@@ -579,11 +639,27 @@ class GetContent(request.Request):
 
     """
 
-    __slots__ = ('share', 'node_id', 'hash', 'offset', 'callback',
-                 'node_attr_callback', 'parts', 'data')
+    __slots__ = (
+        'share',
+        'node_id',
+        'hash',
+        'offset',
+        'callback',
+        'node_attr_callback',
+        'parts',
+        'data',
+    )
 
-    def __init__(self, protocol, share, node_id, a_hash,
-                 offset=0, callback=None, node_attr_callback=None):
+    def __init__(
+        self,
+        protocol,
+        share,
+        node_id,
+        a_hash,
+        offset=0,
+        callback=None,
+        node_attr_callback=None,
+    ):
         """Request the content of node with 'a_hash'.
 
         @param protocol: the request handler
@@ -621,7 +697,8 @@ class GetContent(request.Request):
                     deflated_size=message.node_attr.deflated_size,
                     size=message.node_attr.size,
                     hash=message.node_attr.hash,
-                    crc32=message.node_attr.crc32)
+                    crc32=message.node_attr.crc32,
+                )
         elif message.type == protocol_pb2.Message.BYTES:
             if self.cancelled:
                 # don't care about more bytes if already cancelled
@@ -845,8 +922,10 @@ class CreateUDF(request.Request):
 
     def processMessage(self, message):
         """Process the answer from the server."""
-        if message.type == protocol_pb2.Message.VOLUME_CREATED and \
-                message.volume_created.type == protocol_pb2.Volumes.UDF:
+        if (
+            message.type == protocol_pb2.Message.VOLUME_CREATED
+            and message.volume_created.type == protocol_pb2.Volumes.UDF
+        ):
             self.volume_id = message.volume_created.udf.volume
             self.node_id = message.volume_created.udf.node
             self.done()
@@ -863,6 +942,7 @@ class ListVolumes(request.Request):
         - the user's root-root.
 
     """
+
     __slots__ = ('volumes',)
 
     def __init__(self, protocol):
@@ -1026,8 +1106,13 @@ class Move(request.Request):
     @ivar new_generation: the generation that the volume is at now
     """
 
-    __slots__ = ('share', 'node_id', 'new_parent_id', 'new_name',
-                 'new_generation')
+    __slots__ = (
+        'share',
+        'node_id',
+        'new_parent_id',
+        'new_name',
+        'new_generation',
+    )
 
     def __init__(self, protocol, share, node_id, new_parent_id, new_name):
         """Create the move request
@@ -1229,13 +1314,38 @@ class PutContent(request.Request):
     @ivar new_generation: the generation that the volume is at now
     """
 
-    __slots__ = ('share', 'node_id', 'previous_hash', 'hash', 'crc32', 'size',
-                 'size', 'deflated_size', 'fd', 'upload_id_cb', 'upload_id',
-                 'new_generation', 'max_payload_size', 'magic_hash')
+    __slots__ = (
+        'share',
+        'node_id',
+        'previous_hash',
+        'hash',
+        'crc32',
+        'size',
+        'size',
+        'deflated_size',
+        'fd',
+        'upload_id_cb',
+        'upload_id',
+        'new_generation',
+        'max_payload_size',
+        'magic_hash',
+    )
 
-    def __init__(self, protocol, share, node_id, previous_hash, new_hash,
-                 crc32, size, deflated_size, fd, upload_id=None,
-                 upload_id_cb=None, magic_hash=None):
+    def __init__(
+        self,
+        protocol,
+        share,
+        node_id,
+        previous_hash,
+        new_hash,
+        crc32,
+        size,
+        deflated_size,
+        fd,
+        upload_id=None,
+        upload_id_cb=None,
+        magic_hash=None,
+    ):
         """Put content into a node.
 
         @param protocol: the request handler
@@ -1289,10 +1399,13 @@ class PutContent(request.Request):
         if message.type == protocol_pb2.Message.BEGIN_CONTENT:
             # call the upload_id_cb (if the upload_id it's in the message)
             if message.begin_content.upload_id and self.upload_id_cb:
-                self.upload_id_cb(message.begin_content.upload_id,
-                                  message.begin_content.offset)
+                self.upload_id_cb(
+                    message.begin_content.upload_id,
+                    message.begin_content.offset,
+                )
             message_producer = BytesMessageProducer(
-                self, self.fd, message.begin_content.offset)
+                self, self.fd, message.begin_content.offset
+            )
             self.registerProducer(message_producer, streaming=True)
         elif message.type == protocol_pb2.Message.OK:
             self.new_generation = message.new_generation
@@ -1456,8 +1569,14 @@ class Authenticate(request.Request):
 class QuerySetCaps(request.Request):
     """Query or Set the server to use capabilities."""
 
-    __slots__ = ('caps', 'accepted', 'redirect_hostname', 'redirect_port',
-                 'redirect_srvrecord', 'set_mode')
+    __slots__ = (
+        'caps',
+        'accepted',
+        'redirect_hostname',
+        'redirect_port',
+        'redirect_srvrecord',
+        'set_mode',
+    )
 
     def __init__(self, protocol, caps, set_mode=False):
         """Generate a query_caps or set_caps message to send to the server.
@@ -1563,8 +1682,14 @@ class GetDelta(request.Request):
                 callback
     """
 
-    def __init__(self, protocol, share_id, from_generation=None,
-                 callback=None, from_scratch=False):
+    def __init__(
+        self,
+        protocol,
+        share_id,
+        from_generation=None,
+        callback=None,
+        from_scratch=False,
+    ):
         """Generates a GET_DELTA message to the server.
 
         @param protocol: the request handler
@@ -1593,9 +1718,17 @@ class GetDelta(request.Request):
         self.free_bytes = None
         self.generation = None
 
-    __slots__ = ('share_id', 'from_generation', 'callback', 'delta_message',
-                 'response', 'end_generation', 'full', 'free_bytes',
-                 'generation')
+    __slots__ = (
+        'share_id',
+        'from_generation',
+        'callback',
+        'delta_message',
+        'response',
+        'end_generation',
+        'full',
+        'free_bytes',
+        'generation',
+    )
 
     def _start(self):
         """Send GET_DELTA."""
@@ -1682,8 +1815,9 @@ class ThrottlingStorageClientFactory(StorageClientFactory, object):
     protocol = ThrottlingStorageClient
     client = None
 
-    def __init__(self, throttling_enabled=False,
-                 read_limit=None, write_limit=None):
+    def __init__(
+        self, throttling_enabled=False, read_limit=None, write_limit=None
+    ):
         """Create the instance."""
         self._readLimit = None  # max bytes we should read per second
         self._writeLimit = None  # max bytes we should write per second
@@ -1742,7 +1876,8 @@ class ThrottlingStorageClientFactory(StorageClientFactory, object):
         delayed_call = getattr(self, call_id)
         # check if we already have a DelayedCall running
         if delayed_call is None or (
-                not delayed_call.active() and delayed_call.cancelled):
+            not delayed_call.active() and delayed_call.cancelled
+        ):
             return self.callLater(period, func)
         return delayed_call
 
@@ -1764,46 +1899,62 @@ class ThrottlingStorageClientFactory(StorageClientFactory, object):
 
     def checkReadBandwidth(self):
         """Check if we've passed bandwidth limits."""
-        limit_check = self.valid_limit(self.readLimit) and \
-            self.readLimit is not None and \
-            self.readThisSecond >= self.readLimit
-        should_check = self.throttling_enabled and limit_check and \
-            self.unthrottleReadsID is None
+        limit_check = (
+            self.valid_limit(self.readLimit)
+            and self.readLimit is not None
+            and self.readThisSecond >= self.readLimit
+        )
+        should_check = (
+            self.throttling_enabled
+            and limit_check
+            and self.unthrottleReadsID is None
+        )
         if should_check:
             self.throttleReads()
-            throttle_time = self._get_throttle_time(self.readThisSecond,
-                                                    self.readLimit)
+            throttle_time = self._get_throttle_time(
+                self.readThisSecond, self.readLimit
+            )
             log_debug("pause reads for: %s", throttle_time)
             self.unthrottleReadsID = self.maybeCallLater(
-                'unthrottleReadsID', throttle_time, self.unthrottleReads)
+                'unthrottleReadsID', throttle_time, self.unthrottleReads
+            )
 
     def checkWriteBandwidth(self):
         """Check if we've passed bandwidth limits."""
-        limit_check = self.valid_limit(self.writeLimit) and \
-            self.writeLimit is not None and \
-            self.writtenThisSecond >= self.writeLimit
-        should_check = self.throttling_enabled and limit_check and \
-            self.unthrottleWritesID is None
+        limit_check = (
+            self.valid_limit(self.writeLimit)
+            and self.writeLimit is not None
+            and self.writtenThisSecond >= self.writeLimit
+        )
+        should_check = (
+            self.throttling_enabled
+            and limit_check
+            and self.unthrottleWritesID is None
+        )
         if should_check:
             self.throttleWrites()
-            throttle_time = self._get_throttle_time(self.writtenThisSecond,
-                                                    self.writeLimit)
+            throttle_time = self._get_throttle_time(
+                self.writtenThisSecond, self.writeLimit
+            )
             log_debug("pause writes for: %s", throttle_time)
             self.unthrottleWritesID = self.maybeCallLater(
-                'unthrottleWritesID', throttle_time, self.unthrottleWrites)
+                'unthrottleWritesID', throttle_time, self.unthrottleWrites
+            )
 
     def _resetReadThisSecond(self):
         """Reset the counter named with 'name' every 1 second."""
         # check the bandwidth limits
         self.readThisSecond = 0
         self.resetReadThisSecondID = self.callLater(
-            1, self._resetReadThisSecond)
+            1, self._resetReadThisSecond
+        )
 
     def _resetWrittenThisSecond(self):
         """Reset the counter named with 'name' every 1 second."""
         self.writtenThisSecond = 0
         self.resetWriteThisSecondID = self.callLater(
-            1, self._resetWrittenThisSecond)
+            1, self._resetWrittenThisSecond
+        )
 
     def throttleReads(self):
         """Throttle reads on all protocols."""
@@ -1840,14 +1991,17 @@ class ThrottlingStorageClientFactory(StorageClientFactory, object):
 
     def unregisterProtocol(self, protocol):
         """Stop all DelayedCall we have around."""
-        for delayed in [self.unthrottleReadsID, self.resetReadThisSecondID,
-                        self.unthrottleWritesID, self.resetWriteThisSecondID]:
+        for delayed in [
+            self.unthrottleReadsID,
+            self.resetReadThisSecondID,
+            self.unthrottleWritesID,
+            self.resetWriteThisSecondID,
+        ]:
             self._cancel_delayed_call(delayed)
 
     def _cancel_delayed_call(self, delayed):
         """Safely cancel a DelayedCall."""
-        if delayed is not None and not delayed.cancelled \
-           and delayed.active():
+        if delayed is not None and not delayed.cancelled and delayed.active():
             try:
                 delayed.cancel()
             except defer.AlreadyCalledError:
@@ -1857,11 +2011,13 @@ class ThrottlingStorageClientFactory(StorageClientFactory, object):
     def enable_throttling(self):
         """Enable throttling and start the counter reset loops."""
         # check if we need to start the reset loops
-        if self.resetReadThisSecondID is None and \
-           self.valid_limit(self.readLimit):
+        if self.resetReadThisSecondID is None and self.valid_limit(
+            self.readLimit
+        ):
             self._resetReadThisSecond()
-        if self.resetWriteThisSecondID is None and \
-           self.valid_limit(self.writeLimit):
+        if self.resetWriteThisSecondID is None and self.valid_limit(
+            self.writeLimit
+        ):
             self._resetWrittenThisSecond()
         self.throttling_enabled = True
 

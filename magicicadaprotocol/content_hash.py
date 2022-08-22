@@ -43,6 +43,7 @@ class ContentHash:
     composition to get similar methods.
 
     """
+
     method = noop
     method_name = ""
 
@@ -81,6 +82,7 @@ class HiddenMagicHash:
     don't make it touch disk at all (in logs, dumps, or any kind of
     data storing).
     """
+
     def __init__(self, magic_hash):
         self._magic_hash = magic_hash
 
@@ -102,6 +104,7 @@ class MagicContentHash(ContentHash):
     def digest(self):
         """Forbidden access."""
         raise NotImplementedError("Can not access magic digest.")
+
     hexdigest = digest
 
     def content_hash(self):

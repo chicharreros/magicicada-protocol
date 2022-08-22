@@ -34,10 +34,12 @@ from magicicadaprotocol import errors, protocol_pb2
 
 REQ_ARGS = dict(request=None, message=protocol_pb2.Message())
 
-HIGH_LEVEL_ERRORS = {errors.StorageProtocolErrorSizeTooBig: dict(),
-                     errors.StorageProtocolProtocolError: dict(),
-                     errors.StorageRequestError: REQ_ARGS,
-                     errors.RequestCancelledError: dict()}
+HIGH_LEVEL_ERRORS = {
+    errors.StorageProtocolErrorSizeTooBig: dict(),
+    errors.StorageProtocolProtocolError: dict(),
+    errors.StorageRequestError: REQ_ARGS,
+    errors.RequestCancelledError: dict(),
+}
 
 
 class ErrorsTestCase(unittest.TestCase):
@@ -52,9 +54,11 @@ class ErrorsTestCase(unittest.TestCase):
         """Protocol's specific exceptions are correct."""
         for code_error, proto_error in errors._error_mapping.items():
             self.assertIsInstance(
-                proto_error(**REQ_ARGS), errors.StorageRequestError)
+                proto_error(**REQ_ARGS), errors.StorageRequestError
+            )
             self.assertEqual(
-                proto_error, errors.error_to_exception(code_error))
+                proto_error, errors.error_to_exception(code_error)
+            )
 
     def test_quota_exceed_error(self):
         """QuotaExceeded error must have quota info."""

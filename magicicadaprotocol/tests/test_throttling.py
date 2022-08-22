@@ -65,13 +65,17 @@ class BaseThrottlingTestCase(TwistedTestCase):
         self.client = FakeClient()
         self.factories = []
         self.clock = task.Clock()
-        self.patch(client.ThrottlingStorageClientFactory, 'callLater',
-                   self.clock.callLater)
+        self.patch(
+            client.ThrottlingStorageClientFactory,
+            'callLater',
+            self.clock.callLater,
+        )
 
     def create_factory(self, enabled, read_limit, write_limit):
         """Create a ThrottlingStorageClientFactory with the specified args."""
-        tscf = client.ThrottlingStorageClientFactory(enabled, read_limit,
-                                                     write_limit)
+        tscf = client.ThrottlingStorageClientFactory(
+            enabled, read_limit, write_limit
+        )
         tscf.client = self.client
         self.factories.append(tscf)
         self.addCleanup(self.destroy_factory, tscf)
@@ -94,25 +98,25 @@ class TestProducingState(BaseThrottlingTestCase):
     def test_under_write_limit(self):
         """Don't pas the write limit, no event."""
         self.tscf.registerWritten(2)
-        self.clock.advance(.1)
+        self.clock.advance(0.1)
         self.assertEqual(self.client.events, [])
 
     def test_under_read_limit(self):
         """Don't pas the read limit, no event."""
         self.tscf.registerRead(2)
-        self.clock.advance(.1)
+        self.clock.advance(0.1)
         self.assertEqual(self.client.events, [])
 
     def test_above_write_throttles(self):
         """Above the write limit, throttles."""
         self.tscf.registerWritten(4)
-        self.clock.advance(.1)
+        self.clock.advance(0.1)
         self.assertEqual(self.client.events, ["thW"])
 
     def test_above_read_throttles(self):
         """Above the read limit, throttles."""
         self.tscf.registerRead(4)
-        self.clock.advance(.1)
+        self.clock.advance(0.1)
         self.assertEqual(self.client.events, ["thR"])
 
     def test_above_write_throttles_unthrottles(self):
@@ -146,7 +150,7 @@ class TestProducingState(BaseThrottlingTestCase):
     def test_double_write(self):
         """Two writes on a row while throttling."""
         self.tscf.registerWritten(4)
-        self.clock.advance(.1)
+        self.clock.advance(0.1)
         self.assertEqual(self.client.events, ["thW"])
         self.tscf.registerWritten(1)
         self.clock.advance(2)
@@ -155,7 +159,7 @@ class TestProducingState(BaseThrottlingTestCase):
     def test_double_read(self):
         """Two read on a row while throttling."""
         self.tscf.registerRead(4)
-        self.clock.advance(.1)
+        self.clock.advance(0.1)
         self.assertEqual(self.client.events, ["thR"])
         self.tscf.registerWritten(1)
         self.clock.advance(2)
@@ -167,6 +171,7 @@ class TestLimitValuesInitialization(BaseThrottlingTestCase):
 
     def _test_inactive_limits(self, read_limit, write_limit):
         """Test read_limit and write_limit with throttling enabled."""
+
         def check(tscf):
             """Check that there is no delayed calls nor events."""
             self.assertEqual(2, len(self.clock.getDelayedCalls()))
@@ -175,6 +180,7 @@ class TestLimitValuesInitialization(BaseThrottlingTestCase):
             self.assertNotEqual(None, tscf.resetWriteThisSecondID)
             self.assertEqual(None, tscf.unthrottleWritesID)
             self.assertEqual(self.client.events, [])
+
         tscf = self.create_factory(True, read_limit, write_limit)
         check(tscf)
         self.clock.advance(1.1)
@@ -288,10 +294,10 @@ class TestCheckBandwidth(BaseThrottlingTestCase):
         self.assertEqual(4, tscf.writtenThisSecond)
         self.assertNotEqual(None, tscf.unthrottleReadsID)
         self.assertNotEqual(None, tscf.unthrottleReadsID)
-        self.clock.advance(.9)
+        self.clock.advance(0.9)
         self.assertNotEqual(None, tscf.unthrottleReadsID)
         self.assertNotEqual(None, tscf.unthrottleReadsID)
-        self.clock.advance(.1)
+        self.clock.advance(0.1)
         self.assertEqual(0, tscf.readThisSecond)
         self.assertEqual(0, tscf.writtenThisSecond)
         self.assertEqual(None, tscf.unthrottleReadsID)
@@ -303,10 +309,12 @@ class TestThrottlingLimits(BaseThrottlingTestCase):
 
     def test_limit_None_then_gt_0(self):
         """Test both None and change it to > 0."""
+
         def check(tscf, events=None, delayed_calls=2):
             """Check that there is no delayed calls nor events."""
             self.assertEqual(delayed_calls, len(self.clock.getDelayedCalls()))
             self.assertEqual(self.client.events, events or [])
+
         tscf = self.create_factory(True, None, None)
         self.clock.advance(1.1)
         check(tscf)
@@ -326,9 +334,9 @@ class TestThrottlingLimits(BaseThrottlingTestCase):
         tscf.registerWritten(4)
         expected_events += ['thR', 'thW']
         check(tscf, delayed_calls=4, events=expected_events)
-        self.clock.advance(.9)
+        self.clock.advance(0.9)
         check(tscf, delayed_calls=4, events=expected_events)
-        self.clock.advance(.1)
+        self.clock.advance(0.1)
         expected_events += ['unthR', 'unthW']
         check(tscf, delayed_calls=2, events=expected_events)
         tscf.registerRead(1)
@@ -347,7 +355,7 @@ class TestThrottlingLimits(BaseThrottlingTestCase):
         self.clock.advance(0.9)
         expected_events += ['unthR']
         self.assertEqual(self.client.events, expected_events)
-        self.clock.advance(.1)
+        self.clock.advance(0.1)
         self.assertEqual(self.client.events, expected_events)
         # single throttling
         tscf.registerRead(2)
@@ -367,7 +375,7 @@ class TestThrottlingLimits(BaseThrottlingTestCase):
         self.clock.advance(0.9)
         expected_events += ['unthW']
         self.assertEqual(self.client.events, expected_events)
-        self.clock.advance(.1)
+        self.clock.advance(0.1)
         self.assertEqual(self.client.events, expected_events)
         # single throttling (trigger a callLater(0, ..)
         tscf.registerWritten(2)
@@ -428,10 +436,15 @@ class TestEnablement(BaseThrottlingTestCase):
         self.assertEqual(None, tscf.unthrottleReadsID)
         self.assertEqual(None, tscf.unthrottleWritesID)
         tscf.disable_throttling()
-        self.assertFalse(tscf.throttling_enabled,
-                         "Throttling should be disabled.")
-        for delayed in [tscf.unthrottleReadsID, tscf.resetReadThisSecondID,
-                        tscf.unthrottleWritesID, tscf.resetWriteThisSecondID]:
+        self.assertFalse(
+            tscf.throttling_enabled, "Throttling should be disabled."
+        )
+        for delayed in [
+            tscf.unthrottleReadsID,
+            tscf.resetReadThisSecondID,
+            tscf.unthrottleWritesID,
+            tscf.resetWriteThisSecondID,
+        ]:
             cancelled = delayed is None or delayed.cancelled
             self.assertTrue(cancelled)
 
@@ -451,12 +464,17 @@ class TestEnablement(BaseThrottlingTestCase):
         self.assertEqual(None, tscf.resetWriteThisSecondID)
         tscf.enable_throttling()
         self.assertTrue(
-            tscf.throttling_enabled, "Throttling should be enabled.")
+            tscf.throttling_enabled, "Throttling should be enabled."
+        )
         self.assertNotEqual(None, tscf.resetReadThisSecondID)
         self.assertNotEqual(None, tscf.resetWriteThisSecondID)
         tscf.registerRead(3)
         tscf.registerWritten(3)
-        for delayed in [tscf.unthrottleReadsID, tscf.resetReadThisSecondID,
-                        tscf.unthrottleWritesID, tscf.resetWriteThisSecondID]:
+        for delayed in [
+            tscf.unthrottleReadsID,
+            tscf.resetReadThisSecondID,
+            tscf.unthrottleWritesID,
+            tscf.resetWriteThisSecondID,
+        ]:
             cancelled = delayed.cancelled
             self.assertFalse(cancelled)

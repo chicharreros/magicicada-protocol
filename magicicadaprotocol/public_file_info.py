@@ -45,7 +45,8 @@ class PublicFileInfo:
             share_id=info.share,
             node_id=info.node,
             is_public=info.is_public,
-            public_url=info.public_url)
+            public_url=info.public_url,
+        )
         return result
 
     def __eq__(self, other):

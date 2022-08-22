@@ -33,8 +33,9 @@ from io import StringIO, BytesIO
 
 from twisted.test.proto_helpers import StringTransport
 
-from magicicadaprotocol import protocol_pb2, request
+from magicicadaprotocol import protocol_pb2
 from magicicadaprotocol.client import PutContent, StorageClient
+from magicicadaprotocol.request import SIZE_FMT_SIZE
 
 
 class TestOffset(unittest.TestCase):
@@ -53,7 +54,8 @@ class TestOffset(unittest.TestCase):
         protocol.max_payload_size = 20
 
         fd = BytesIO(
-            b"Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
+            b"Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+        )
         pc = PutContent(protocol, 'share', 'node', '', '', 0, 0, 0, fd)
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.BEGIN_CONTENT
@@ -83,8 +85,18 @@ class TestOffset(unittest.TestCase):
         upload_id = 'foo'
         offset = 123456
         called = []
-        pc = PutContent(self.protocol, 'share', 'node', '', '', 0, 0, 0,
-                        StringIO(''), upload_id_cb=lambda *a: called.append(a))
+        pc = PutContent(
+            self.protocol,
+            'share',
+            'node',
+            '',
+            '',
+            0,
+            0,
+            0,
+            StringIO(''),
+            upload_id_cb=lambda *a: called.append(a),
+        )
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.BEGIN_CONTENT
         message.begin_content.upload_id = upload_id
@@ -108,8 +120,18 @@ class TestUploadId(unittest.TestCase):
         """Test that, if the server specify an upload_id, we save it."""
         upload_id = "foo"
         called = []
-        pc = PutContent(self.protocol, 'share', 'node', '', '', 0, 0, 0,
-                        StringIO(''), upload_id_cb=lambda *a: called.append(a))
+        pc = PutContent(
+            self.protocol,
+            'share',
+            'node',
+            '',
+            '',
+            0,
+            0,
+            0,
+            StringIO(''),
+            upload_id_cb=lambda *a: called.append(a),
+        )
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.BEGIN_CONTENT
         message.begin_content.upload_id = upload_id
@@ -122,8 +144,18 @@ class TestUploadId(unittest.TestCase):
     def test_server_upload_id_none(self):
         """Test that if there is no upload_id we ignore it."""
         called = []
-        pc = PutContent(self.protocol, 'share', 'node', '', '',
-                        0, 0, 0, StringIO(''), upload_id_cb=called.append)
+        pc = PutContent(
+            self.protocol,
+            'share',
+            'node',
+            '',
+            '',
+            0,
+            0,
+            0,
+            StringIO(''),
+            upload_id_cb=called.append,
+        )
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.BEGIN_CONTENT
         pc.start()
@@ -132,30 +164,51 @@ class TestUploadId(unittest.TestCase):
 
     def test_client_upload_id(self):
         """Test that, we send the upload id to the server."""
-        pc = PutContent(self.protocol, 'share', 'node', '', '',
-                        0, 0, 0, StringIO(''), upload_id='foo')
+        pc = PutContent(
+            self.protocol,
+            'share',
+            'node',
+            '',
+            '',
+            0,
+            0,
+            0,
+            StringIO(''),
+            upload_id='foo',
+        )
         pc.start()
         pc_msg = protocol_pb2.Message()
         data = self.protocol.transport.value()
-        pc_msg.ParseFromString(data[request.SIZE_FMT_SIZE:])
+        pc_msg.ParseFromString(data[SIZE_FMT_SIZE:])
         self.assertEqual(pc_msg.put_content.upload_id, 'foo')
 
     def test_magic_hash_something(self):
         """Send magic hash in the PutContent."""
-        pc = PutContent(self.protocol, 'share', 'node', '', '',
-                        0, 0, 0, StringIO(''), magic_hash='foo')
+        pc = PutContent(
+            self.protocol,
+            'share',
+            'node',
+            '',
+            '',
+            0,
+            0,
+            0,
+            StringIO(''),
+            magic_hash='foo',
+        )
         pc.start()
         pc_msg = protocol_pb2.Message()
         data = self.protocol.transport.value()
-        pc_msg.ParseFromString(data[request.SIZE_FMT_SIZE:])
+        pc_msg.ParseFromString(data[SIZE_FMT_SIZE:])
         self.assertEqual(pc_msg.put_content.magic_hash, 'foo')
 
     def test_magic_hash_none(self):
         """Don't send magic hash in the PutContent."""
-        pc = PutContent(self.protocol, 'share', 'node', '', '',
-                        0, 0, 0, StringIO(''))
+        pc = PutContent(
+            self.protocol, 'share', 'node', '', '', 0, 0, 0, StringIO('')
+        )
         pc.start()
         pc_msg = protocol_pb2.Message()
         data = self.protocol.transport.value()
-        pc_msg.ParseFromString(data[request.SIZE_FMT_SIZE:])
+        pc_msg.ParseFromString(data[SIZE_FMT_SIZE:])
         self.assertEqual(pc_msg.put_content.magic_hash, '')

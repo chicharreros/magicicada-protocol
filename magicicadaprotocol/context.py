@@ -47,10 +47,11 @@ class HostnameVerifyContextFactory(ssl.CertificateOptions):
         if depth == 0:
             # No extra checks because U1 certs have the right commonName
             if self.expected_hostname != cert.get_subject().commonName:
-                log.err("Host name does not match certificate. "
-                        "Expected %s but got %s." % (
-                            self.expected_hostname,
-                            cert.get_subject().commonName))
+                log.err(
+                    "Host name does not match certificate. "
+                    "Expected %s but got %s."
+                    % (self.expected_hostname, cert.get_subject().commonName)
+                )
                 return False
         return preverifyOK
 
@@ -94,8 +95,12 @@ def get_ssl_context(no_verify, hostname=None):
     else:
         if hostname is None:
             raise error.CertificateError(
-                'No hostname specified. Unable to verify SSL certificate.')
-        ctx = HostnameVerifyContextFactory(hostname, verify=True,
-                                           caCerts=get_certificates(),
-                                           method=SSL.SSLv23_METHOD)
+                'No hostname specified. Unable to verify SSL certificate.'
+            )
+        ctx = HostnameVerifyContextFactory(
+            hostname,
+            verify=True,
+            caCerts=get_certificates(),
+            method=SSL.SSLv23_METHOD,
+        )
     return ctx

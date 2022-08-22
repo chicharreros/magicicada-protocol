@@ -49,8 +49,12 @@ class VolumeTestCase(unittest.TestCase):
     volume_id = VOLUME
 
     volume_class = volumes.Volume
-    kwargs = dict(volume_id=VOLUME, node_id=NODE,
-                  free_bytes=FREE_BYTES, generation=GENERATION)
+    kwargs = dict(
+        volume_id=VOLUME,
+        node_id=NODE,
+        free_bytes=FREE_BYTES,
+        generation=GENERATION,
+    )
 
     def setUp(self):
         """Initialize testing volume."""
@@ -82,8 +86,9 @@ class VolumeTestCase(unittest.TestCase):
 
     def test_from_msg(self):
         """Test creation using from_msg."""
-        self.assertRaises(NotImplementedError,
-                          self.volume_class.from_msg, None)
+        self.assertRaises(
+            NotImplementedError, self.volume_class.from_msg, None
+        )
 
     def test_is_equal(self):
         """Test object equality."""
@@ -93,7 +98,8 @@ class VolumeTestCase(unittest.TestCase):
         for attr, value in self.kwargs.items():
             setattr(other, attr, None)
             self.assertNotEqual(
-                other, self.volume, 'not equal when %s differ' % attr)
+                other, self.volume, 'not equal when %s differ' % attr
+            )
             setattr(other, attr, value)
 
         self.assertEqual(other, self.volume)
@@ -106,12 +112,18 @@ class ShareTestCase(VolumeTestCase):
     only_view = volumes._access_prot2nice[protocol_pb2.Shares.VIEW]
 
     volume_class = volumes.ShareVolume
-    kwargs = dict(volume_id=VOLUME, node_id=NODE,
-                  free_bytes=FREE_BYTES, generation=GENERATION,
-                  direction=to_me,
-                  share_name=NAME, other_username=USER,
-                  other_visible_name=USER, accepted=False,
-                  access_level=only_view)
+    kwargs = dict(
+        volume_id=VOLUME,
+        node_id=NODE,
+        free_bytes=FREE_BYTES,
+        generation=GENERATION,
+        direction=to_me,
+        share_name=NAME,
+        other_username=USER,
+        other_visible_name=USER,
+        accepted=False,
+        access_level=only_view,
+    )
 
     def assert_correct_attributes(self):
         """Assert over attribute correctness."""
@@ -141,9 +153,13 @@ class UDFTestCase(VolumeTestCase):
     """Check UDF data type."""
 
     volume_class = volumes.UDFVolume
-    kwargs = dict(volume_id=VOLUME, node_id=NODE,
-                  free_bytes=FREE_BYTES, generation=GENERATION,
-                  suggested_path=PATH)
+    kwargs = dict(
+        volume_id=VOLUME,
+        node_id=NODE,
+        free_bytes=FREE_BYTES,
+        generation=GENERATION,
+        suggested_path=PATH,
+    )
 
     def assert_correct_attributes(self):
         """Assert over attribute correctness."""

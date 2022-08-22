@@ -34,8 +34,7 @@ from twisted.python.failure import Failure
 from twisted.trial.unittest import TestCase as TwistedTestCase
 
 from magicicadaprotocol import errors, protocol_pb2
-from magicicadaprotocol.request import (
-    RequestHandler, Request, RequestResponse)
+from magicicadaprotocol.request import RequestHandler, Request, RequestResponse
 
 
 class MindlessRequest(Request):
@@ -102,8 +101,9 @@ class TestRequest(TwistedTestCase):
 
     def test_default_process_message_basic(self):
         """_default_process_message maps errors to exceptions."""
-        self.patch(self.request, 'error',
-                   lambda error: setattr(self, 'error', error))
+        self.patch(
+            self.request, 'error', lambda error: setattr(self, 'error', error)
+        )
 
         message = protocol_pb2.Message()
         self.request._default_process_message(message)
@@ -114,8 +114,9 @@ class TestRequest(TwistedTestCase):
 
     def test_default_process_message_no_error_message(self):
         """_default_process_message maps errors to exceptions."""
-        self.patch(self.request, 'error',
-                   lambda error: setattr(self, 'error', error))
+        self.patch(
+            self.request, 'error', lambda error: setattr(self, 'error', error)
+        )
 
         message = protocol_pb2.Message()
         self.request._default_process_message(message)
@@ -126,8 +127,9 @@ class TestRequest(TwistedTestCase):
 
     def test_default_process_message(self):
         """_default_process_message maps errors to exceptions."""
-        self.patch(self.request, 'error',
-                   lambda error: setattr(self, 'error', error))
+        self.patch(
+            self.request, 'error', lambda error: setattr(self, 'error', error)
+        )
 
         for code_error, proto_error in errors._error_mapping.items():
             message = protocol_pb2.Message()
@@ -159,16 +161,22 @@ class TestRequest(TwistedTestCase):
             """Check the message"""
             self.assertEqual(message.id, self.request.id)
             self.assertEqual(message.type, protocol_pb2.Message.ERROR)
-            self.assertEqual(message.error.type,
-                             protocol_pb2.Error.QUOTA_EXCEEDED)
+            self.assertEqual(
+                message.error.type, protocol_pb2.Error.QUOTA_EXCEEDED
+            )
             self.assertEqual(message.error.comment, comment)
-            self.assertEqual(message.free_space_info.free_bytes,
-                             free_space_info['free_bytes'])
-            self.assertEqual(message.free_space_info.share_id,
-                             free_space_info['share_id'])
+            self.assertEqual(
+                message.free_space_info.free_bytes,
+                free_space_info['free_bytes'],
+            )
+            self.assertEqual(
+                message.free_space_info.share_id, free_space_info['share_id']
+            )
+
         self.patch(self.request, 'sendMessage', check)
-        self.request.sendError(error_type, comment=comment,
-                               free_space_info=free_space_info)
+        self.request.sendError(
+            error_type, comment=comment, free_space_info=free_space_info
+        )
 
 
 class TestRequestResponse(TestRequest):
@@ -183,5 +191,6 @@ class TestRequestResponse(TestRequest):
         protocol = RequestHandler()
         protocol.makeConnection(transport)
         self.request = MindlessRequestResponse(
-            protocol=protocol, message=message)
+            protocol=protocol, message=message
+        )
         self.request.protocol.requests[message.id] = self.request

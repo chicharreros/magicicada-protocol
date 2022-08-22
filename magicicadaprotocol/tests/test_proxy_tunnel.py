@@ -70,11 +70,19 @@ class FakeTransport(StringTransport):
 
 class FakeConnectHTTPS(object):
     """Fake HTTPS Connection"""
-    def __init__(self, host, port, factory, proxy_callback,
-                 user=None, passwd=None, peer_callback=None):
+
+    def __init__(
+        self,
+        host,
+        port,
+        factory,
+        proxy_callback,
+        user=None,
+        passwd=None,
+        peer_callback=None,
+    ):
         """FakeConnectHTTPS initialization"""
-        self.transport = FakeTransport(
-            self.proxy_callback, self.peer_callback)
+        self.transport = FakeTransport(self.proxy_callback, self.peer_callback)
 
         self.proxy_callback_f = proxy_callback
         self.peer_callback_f = peer_callback
@@ -110,6 +118,7 @@ def make_server(proxy_callback, peer_callback, auth):
 
     class TestClientFactory(ClientFactory):
         """Factory for test client"""
+
         protocol = TestClient
 
         def __init__(self):
@@ -119,12 +128,20 @@ def make_server(proxy_callback, peer_callback, auth):
         def clientConnectionFailed(self, connector, reason):
             """Connection failed"""
             d.errback(Exception("failed"))
+
     if auth:
         user, passwd = auth.split(":")
     else:
         user, passwd = None, None
-    FakeConnectHTTPS("test", 1, TestClientFactory(), proxy_callback,
-                     user, passwd, peer_callback)
+    FakeConnectHTTPS(
+        "test",
+        1,
+        TestClientFactory(),
+        proxy_callback,
+        user,
+        passwd,
+        peer_callback,
+    )
     return d
 
 
@@ -132,14 +149,15 @@ def test_response(response_string, auth=None):
     """Test the response"""
 
     assert isinstance(response_string, bytes), (
-        '%r should be bytes' % response_string)
+        '%r should be bytes' % response_string
+    )
 
     def response(data, proto, fact):
         """Response callback"""
         if auth is not None:
-            auth_line = (
-                b"Proxy-Authorization: Basic " +
-                base64.b64encode(b"test:test"))
+            auth_line = b"Proxy-Authorization: Basic " + base64.b64encode(
+                b"test:test"
+            )
             if auth_line not in data:
                 proto.dataReceived(b"HTTP/1.0 403 Forbidden\r\n\r\n")
             else:
@@ -152,6 +170,7 @@ def test_response(response_string, auth=None):
 
 class TunnelTests(TwistedTestCase):
     """Test the proxy tunnel"""
+
     def test_connect(self):
         """Test connecting"""
         return test_response(b"HTTP/1.0 200 Connection Made\r\n\r\n")
@@ -162,32 +181,38 @@ class TunnelTests(TwistedTestCase):
         d2 = test_response(b"HTTP/1.0 503 Service Unavailable\r\n\r\n")
         d2.addCallbacks(
             lambda r: d.errback(Exception("error: connection made")),
-            lambda r: d.callback("ok"))
+            lambda r: d.callback("ok"),
+        )
         return d
 
     def test_auth_required(self):
         """Test auth requriement"""
         d = defer.Deferred()
         d2 = test_response(
-            b"HTTP/1.0 407 Proxy Authentication Required\r\n\r\n")
+            b"HTTP/1.0 407 Proxy Authentication Required\r\n\r\n"
+        )
         d2.addCallbacks(
             lambda r: d.errback(Exception("error: connection made")),
-            lambda r: d.callback("ok"))
+            lambda r: d.callback("ok"),
+        )
         return d
 
     def test_connect_auth(self):
         """Test connecting with auth"""
         return test_response(
-            b"HTTP/1.0 200 Connection Made\r\n\r\n", auth="test:test")
+            b"HTTP/1.0 200 Connection Made\r\n\r\n", auth="test:test"
+        )
 
     def test_auth_error(self):
         """Test auth failure"""
         d = defer.Deferred()
-        d2 = test_response(b"HTTP/1.0 200 Connection Made\r\n\r\n",
-                           auth="test:notthepassword")
+        d2 = test_response(
+            b"HTTP/1.0 200 Connection Made\r\n\r\n", auth="test:notthepassword"
+        )
         d2.addCallbacks(
             lambda r: d.errback(Exception("error: connection made")),
-            lambda r: d.callback("ok"))
+            lambda r: d.callback("ok"),
+        )
         return d
 
     def test_echo(self):
@@ -204,6 +229,7 @@ class TunnelTests(TwistedTestCase):
 
         class TestClient(Protocol):
             """Test echo Client"""
+
             __message = b"hello world!"
 
             def __init__(self):
@@ -223,6 +249,7 @@ class TunnelTests(TwistedTestCase):
 
         class TestClientFactory(ClientFactory):
             """Factory for test echo client"""
+
             protocol = TestClient
 
             def __init__(self):
@@ -232,8 +259,14 @@ class TunnelTests(TwistedTestCase):
             def clientConnectionFailed(self, connector, reason):
                 """Connection failed"""
                 d.errback(Exception("failed"))
-        FakeConnectHTTPS("test", 1, TestClientFactory(),
-                         response, peer_callback=peer_callback)
+
+        FakeConnectHTTPS(
+            "test",
+            1,
+            TestClientFactory(),
+            response,
+            peer_callback=peer_callback,
+        )
         return d
 
     def test_connection_lost(self):
@@ -265,6 +298,7 @@ class TunnelTests(TwistedTestCase):
 
         class TestClientFactory(ClientFactory):
             """Factory for test client"""
+
             protocol = TestClient
 
             def __init__(self):
@@ -275,6 +309,11 @@ class TunnelTests(TwistedTestCase):
                 """Connection failed"""
                 d.errback(Exception("failed"))
 
-        FakeConnectHTTPS("test", 1, TestClientFactory(),
-                         response, peer_callback=peer_callback)
+        FakeConnectHTTPS(
+            "test",
+            1,
+            TestClientFactory(),
+            response,
+            peer_callback=peer_callback,
+        )
         return d
