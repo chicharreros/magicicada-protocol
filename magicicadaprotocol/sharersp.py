@@ -36,10 +36,18 @@ class ShareResponse:
     """This is a handy object to support all the fields of a share listing."""
 
     @classmethod
-    def from_params(cls, share_id, direction, subtree,
-                    share_name, other_username,
-                    other_visible_name, accepted, access_level,
-                    subtree_volume_id=None):
+    def from_params(
+        cls,
+        share_id,
+        direction,
+        subtree,
+        share_name,
+        other_username,
+        other_visible_name,
+        accepted,
+        access_level,
+        subtree_volume_id=None,
+    ):
         """Creates the object from given parameters."""
         o = cls()
         o.id = share_id
@@ -51,8 +59,9 @@ class ShareResponse:
         o.accepted = accepted
         o.access_level = access_level
         if direction == "to_me" and subtree_volume_id is not None:
-            raise ValueError("Shares with direction 'to_me' must not have"
-                             " a volume_id")
+            raise ValueError(
+                "Shares with direction 'to_me' must not have" " a volume_id"
+            )
         elif direction == "from_me":
             o.subtree_volume_id = subtree_volume_id
         return o
@@ -92,8 +101,13 @@ class ShareResponse:
 
     def __str__(self):
         t = "Share %r [%s] (other: %s, access: %s, accepted: %s, id: %s)" % (
-                    self.name, self.direction, self.other_username,
-                    self.access_level, self.accepted, self.id)
+            self.name,
+            self.direction,
+            self.other_username,
+            self.access_level,
+            self.accepted,
+            self.id,
+        )
         return t
 
 
@@ -101,8 +115,15 @@ class NotifyShareHolder:
     """This is a handy object to support all the fields of a share notify."""
 
     @classmethod
-    def from_params(cls, share_id, subtree, share_name, from_username,
-                    from_visible_name, access_level):
+    def from_params(
+        cls,
+        share_id,
+        subtree,
+        share_name,
+        from_username,
+        from_visible_name,
+        access_level,
+    ):
         """Creates the object from given parameters."""
         o = cls()
         o.share_id = share_id
@@ -136,6 +157,9 @@ class NotifyShareHolder:
 
     def __str__(self):
         t = "Share Notification %r (from: %s, access: %s, id: %s)" % (
-                    self.share_name, self.from_username,
-                    self.access_level, self.share_id)
+            self.share_name,
+            self.from_username,
+            self.access_level,
+            self.share_id,
+        )
         return t

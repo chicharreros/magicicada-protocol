@@ -79,8 +79,9 @@ def parse_dir_content(stream):
     unserialized_content.ParseFromString(raw_content)
 
     for entry in unserialized_content.entries:
-        yield DirEntry(name=entry.name, node_type=entry.node_type,
-                       uuid=entry.node)
+        yield DirEntry(
+            name=entry.name, node_type=entry.node_type, uuid=entry.node
+        )
 
 
 def write_dir_content(entries, stream):
@@ -157,9 +158,11 @@ class DirEntry:
 
     def __eq__(self, other):
         if isinstance(other, DirEntry):
-            return self.name == other.name and \
-                self.utf8_name == other.utf8_name and \
-                self.node_type == other.node_type and \
-                self.uuid == other.uuid
+            return (
+                self.name == other.name
+                and self.utf8_name == other.utf8_name
+                and self.node_type == other.node_type
+                and self.uuid == other.uuid
+            )
         else:
             return False

@@ -32,6 +32,7 @@ from uuid import UUID
 
 from google.protobuf.message import Message as _PBMessage
 from google.protobuf.internal.containers import BaseContainer as _PBContainer
+
 try:
     from google.protobuf.internal.cpp_message import RepeatedCompositeContainer
 except ImportError:
@@ -82,8 +83,10 @@ def is_valid_hash(a_hash):
     """
     # circular import
     from magicicadaprotocol import request
-    is_valid = (a_hash == '' or a_hash == request.UNKNOWN_HASH or
-                is_valid_sha1(a_hash))
+
+    is_valid = (
+        a_hash == '' or a_hash == request.UNKNOWN_HASH or is_valid_sha1(a_hash)
+    )
     return is_valid
 
 
@@ -93,6 +96,7 @@ def validate_message(message):
     """
     is_invalid = []
     from magicicadaprotocol import validators  # this is us!
+
     for descriptor, submsg in message.ListFields():
         if isinstance(submsg, CONTAINER_CLASSES):
             # containers are iterables that have messages in them
@@ -103,12 +107,14 @@ def validate_message(message):
             is_invalid.extend(validate_message(submsg))
         else:
             # we got down to the actual fields! yay
-            validator = getattr(validators,
-                                "is_valid_" + descriptor.name, None)
+            validator = getattr(
+                validators, "is_valid_" + descriptor.name, None
+            )
             if validator is not None:
                 if not validator(submsg):
-                    is_invalid.append("Invalid %s: %r"
-                                      % (descriptor.name, submsg))
+                    is_invalid.append(
+                        "Invalid %s: %r" % (descriptor.name, submsg)
+                    )
     return is_invalid
 
 

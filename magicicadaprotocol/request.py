@@ -42,9 +42,13 @@ from zope.interface import implementer
 
 from magicicadaprotocol import protocol_pb2, validators
 from magicicadaprotocol.errors import (
-    StorageProtocolError, StorageProtocolErrorSizeTooBig,
-    StorageProtocolProtocolError, StorageRequestError,
-    RequestCancelledError, error_to_exception)
+    StorageProtocolError,
+    StorageProtocolErrorSizeTooBig,
+    StorageProtocolProtocolError,
+    StorageRequestError,
+    RequestCancelledError,
+    error_to_exception,
+)
 
 
 # the max possible packet size is 2**32 (32 bits for size)
@@ -53,7 +57,7 @@ from magicicadaprotocol.errors import (
 # (two bytes overhead per packet against smaller size)
 SIZE_FMT = "!I"
 SIZE_FMT_SIZE = struct.calcsize(SIZE_FMT)
-MAX_MESSAGE_SIZE = 2 ** 16
+MAX_MESSAGE_SIZE = 2**16
 UNKNOWN_HASH = "unknown"
 # XXX lucio.torre, wild guess on payload size, fix with something better
 MAX_PAYLOAD_SIZE = MAX_MESSAGE_SIZE - 300
@@ -210,7 +214,7 @@ class RequestHandler(Protocol):
             self.log.error("Validation error: " + ", ".join(is_invalid))
             comment = "Validation error:\n" + "\n".join(is_invalid)
             if len(comment) > MAX_PAYLOAD_SIZE - 100:
-                comment = comment[:MAX_PAYLOAD_SIZE - 112] + ' [truncated]'
+                comment = comment[: MAX_PAYLOAD_SIZE - 112] + ' [truncated]'
             error_message = protocol_pb2.Message()
             error_message.id = message.id
             error_message.type = protocol_pb2.Message.ERROR
@@ -225,17 +229,22 @@ class RequestHandler(Protocol):
                 except Exception as e:
                     self.requests[message.id].error(e)
             else:
-                name = protocol_pb2.Message.DESCRIPTOR \
-                    .enum_types_by_name['MessageType'] \
-                    .values_by_number[message.type].name
+                name = (
+                    protocol_pb2.Message.DESCRIPTOR.enum_types_by_name[
+                        'MessageType'
+                    ]
+                    .values_by_number[message.type]
+                    .name
+                )
 
                 handler = getattr(self, "handle_" + name, None)
                 if handler is not None:
                     result = handler(message)
                 else:
-                    raise Exception("peer cant handle message '%s' {%s}" % (
-                            name,
-                            str(message).replace("\n", " ")))
+                    raise Exception(
+                        "peer cant handle message '%s' {%s}"
+                        % (name, str(message).replace("\n", " "))
+                    )
         return result
 
     def sendMessage(self, message):
@@ -259,7 +268,7 @@ class RequestHandler(Protocol):
         pass  # no-op
 
     def ping(self):
-        """ ping the other end
+        """ping the other end
 
         will return a deferred that will get called with
         the request object when completed.
@@ -288,8 +297,16 @@ class Request:
     @ivar id: the request id or None if not started
     """
 
-    __slots__ = ('protocol', 'id', 'deferred', 'producer', 'started',
-                 'finished', 'cancelled', 'producing')
+    __slots__ = (
+        'protocol',
+        'id',
+        'deferred',
+        'producer',
+        'started',
+        'finished',
+        'cancelled',
+        'producing',
+    )
 
     def __init__(self, protocol):
         """created a request.
@@ -443,12 +460,14 @@ class Request:
         Note that you may receive RequestCancelledError in your
         'error_errback' func.
         """
+
         def _f(*args, **kwargs):
             """Function to be called from twisted when its time arrives."""
             if self.cancelled:
                 msg = "The request id=%d is cancelled! (before calling %r)"
                 raise RequestCancelledError(msg % (self.id, function))
             return function(*args, **kwargs)
+
         return _f
 
 

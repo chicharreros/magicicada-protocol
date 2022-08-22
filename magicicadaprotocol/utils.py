@@ -75,6 +75,8 @@ class BaseTimestampChecker:
             except Exception as e:
                 log_debug("Error while verifying the server time skew:", e)
                 self.next_check = local_time + self.ERROR_INTERVAL
-        log_debug("Using corrected timestamp:",
-                  http.datetimeToString(local_time + self.skew))
+        log_debug(
+            "Using corrected timestamp:",
+            http.datetimeToString(local_time + self.skew),
+        )
         defer.returnValue(int(local_time + self.skew))

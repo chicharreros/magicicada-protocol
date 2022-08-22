@@ -59,7 +59,11 @@ clean:
 	find -name '*.pyc' -delete
 	rm -rf build dist sdist _trial_temp magicicadaprotocol.egg-info $(ENV)
 
-lint: $(ENV) build
-	$(ENV)/bin/flake8 --filename='*.py' --exclude='$(ENV),*_pb2.py,build'
+black:
+	$(ENV)/bin/black .
+
+lint:
+	$(ENV)/bin/black --check .
+	$(ENV)/bin/flake8 --exclude='*_pb2.py' magicicadaprotocol samples
 
 .PHONY: build bdist upload test lint

@@ -40,7 +40,8 @@ class ProxyTunnelClient(Protocol):
     original protocol.
 
     """
-    MAX_LINE_LEN = 2 ** 14
+
+    MAX_LINE_LEN = 2**14
 
     def __init__(self, *args, **kwargs):
         """Initialize the class."""
@@ -73,7 +74,9 @@ class ProxyTunnelClient(Protocol):
         self.__buffer = b""
         # send request
         line = "CONNECT %s:%s HTTP/1.0" % (
-            self.factory.host, self.factory.port)
+            self.factory.host,
+            self.factory.port,
+        )
         self.write_line(line)
         # send headers
         self.sendHeader("Host", self.factory.host)
@@ -87,7 +90,8 @@ class ProxyTunnelClient(Protocol):
                 passwd = passwd.encode('utf8')
             auth_bytes = base64.b64encode(b"%s:%s" % (user, passwd))
             self.sendHeader(
-                "Proxy-Authorization", "Basic %s" % auth_bytes.decode("utf8"))
+                "Proxy-Authorization", "Basic %s" % auth_bytes.decode("utf8")
+            )
         self.write_line()
 
     def error(self, reason):
@@ -133,8 +137,9 @@ class ProxyTunnelClient(Protocol):
                 self.start()
             else:
                 self.error(
-                    "Error in proxy negotiation: %s %s" %
-                    (self.status, self.message))
+                    "Error in proxy negotiation: %s %s"
+                    % (self.status, self.message)
+                )
 
     def start(self):
         """Start doing stuf."""
@@ -146,6 +151,7 @@ class ProxyTunnelClient(Protocol):
 
 class ProxyTunnelFactory(ClientFactory):
     """Factory class for the proxy tunnel."""
+
     protocol = ProxyTunnelClient
 
     def __init__(self, host, port, factory, user=None, passwd=None):
@@ -159,11 +165,13 @@ class ProxyTunnelFactory(ClientFactory):
     def clientConnectionFailed(self, connector, reason):
         """Proxy client connection failed."""
         self.factory.clientConnectionFailed(
-            connector, "Proxy connection error: %s" % (str(reason)))
+            connector, "Proxy connection error: %s" % (str(reason))
+        )
 
 
-def connectHTTPS(proxy_host, proxy_port, host, port, factory,
-                 user=None, passwd=None):
+def connectHTTPS(
+    proxy_host, proxy_port, host, port, factory, user=None, passwd=None
+):
     """
     use this function like reactor.connectTCP/connectSLL.
     it takes the usual parameters plus the proxy information.

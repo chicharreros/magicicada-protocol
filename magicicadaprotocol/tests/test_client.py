@@ -90,6 +90,7 @@ def was_called(self, flag):
     def set_flag(*args, **kwargs):
         """Record the calling was made."""
         setattr(self, flag, True)
+
     return set_flag
 
 
@@ -186,8 +187,9 @@ class ClientTestCase(TestCase):
 
     def test_init_maxpayloadsize(self):
         """Get the value from the constant at init time."""
-        self.assertEqual(self.client.max_payload_size,
-                         request.MAX_PAYLOAD_SIZE)
+        self.assertEqual(
+            self.client.max_payload_size, request.MAX_PAYLOAD_SIZE
+        )
 
     def test_data_received_index_error(self):
         self.client.dataReceived(b'foo bar')
@@ -220,8 +222,9 @@ class ClientTestCase(TestCase):
     def test_client_get_delta_bad(self):
         """Require from_generation or from_scratch."""
 
-        self.assertRaises(TypeError, self.client.get_delta,
-                          share_id=SHARE, callback=1)
+        self.assertRaises(
+            TypeError, self.client.get_delta, share_id=SHARE, callback=1
+        )
 
     def test_create_udf(self):
         """Test create_udf."""
@@ -254,14 +257,17 @@ class ClientTestCase(TestCase):
 
     def test_callback_must_be_callable(self):
         """Test set callback parameters."""
-        self.assertRaises(TypeError, self.client.set_volume_created_callback,
-                          'hello')
+        self.assertRaises(
+            TypeError, self.client.set_volume_created_callback, 'hello'
+        )
 
-        self.assertRaises(TypeError, self.client.set_volume_deleted_callback,
-                          'world')
+        self.assertRaises(
+            TypeError, self.client.set_volume_deleted_callback, 'world'
+        )
 
-        self.assertRaises(TypeError,
-                          self.client.set_volume_new_generation_callback, 'fu')
+        self.assertRaises(
+            TypeError, self.client.set_volume_new_generation_callback, 'fu'
+        )
 
     def test_set_volume_created_callback(self):
         """Test callback setting."""
@@ -271,17 +277,20 @@ class ClientTestCase(TestCase):
     def test_set_volume_new_generation_callback(self):
         """Test callback setting."""
         self.client.set_volume_new_generation_callback(noop_callback)
-        self.assertIs(self.client._volume_new_generation_callback,
-                      noop_callback)
+        self.assertIs(
+            self.client._volume_new_generation_callback, noop_callback
+        )
 
     # share notification callbacks
     def test_share_change_callback(self):
         """Test share_change callback usage."""
-        self.assertRaises(TypeError, self.client.set_share_change_callback,
-                          'hello')
+        self.assertRaises(
+            TypeError, self.client.set_share_change_callback, 'hello'
+        )
         # create a response and message
         share_resp = sharersp.NotifyShareHolder.from_params(
-            uuid.uuid4(), uuid.uuid4(), 'sname', 'byu', 'tou', 'View')
+            uuid.uuid4(), uuid.uuid4(), 'sname', 'byu', 'tou', 'View'
+        )
         proto_msg = protocol_pb2.Message()
         proto_msg.type = protocol_pb2.Message.NOTIFY_SHARE
         share_resp.dump_to_msg(proto_msg.notify_share)
@@ -299,8 +308,9 @@ class ClientTestCase(TestCase):
 
     def test_share_delete_callback(self):
         """Test share_delete callback usage."""
-        self.assertRaises(TypeError, self.client.set_share_delete_callback,
-                          'hello')
+        self.assertRaises(
+            TypeError, self.client.set_share_delete_callback, 'hello'
+        )
 
         share_id = uuid.uuid4()
         proto_msg = protocol_pb2.Message()
@@ -320,8 +330,9 @@ class ClientTestCase(TestCase):
 
     def test_share_answer_callback(self):
         """Test share_answer callback usage."""
-        self.assertRaises(TypeError, self.client.set_share_answer_callback,
-                          'hello')
+        self.assertRaises(
+            TypeError, self.client.set_share_answer_callback, 'hello'
+        )
 
         share_id = uuid.uuid4()
         proto_msg = protocol_pb2.Message()
@@ -346,7 +357,8 @@ class ClientTestCase(TestCase):
         # set the callback to record the info
         called = []
         self.client.set_volume_new_generation_callback(
-            lambda *a: called.append(a))
+            lambda *a: called.append(a)
+        )
 
         # create the message
         message = protocol_pb2.Message()
@@ -364,7 +376,8 @@ class ClientTestCase(TestCase):
         # set the callback to record the info
         called = []
         self.client.set_volume_new_generation_callback(
-            lambda *a: called.append(a))
+            lambda *a: called.append(a)
+        )
 
         # create the message
         message = protocol_pb2.Message()
@@ -483,7 +496,8 @@ class RequestTestCase(TestCase):
         request = self.request_class(protocol, *args, **kwargs)
         self.done_called = False
         request.deferred.addCallbacks(
-            was_called(self, 'done_called'), faked_error)
+            was_called(self, 'done_called'), faked_error
+        )
         if start:
             request.start()
         return request
@@ -514,7 +528,7 @@ class CreateUDFTestCase(RequestTestCase):
         request.start()
 
         self.assertEqual(1, len(request.protocol.messages))
-        actual_msg, = request.protocol.messages
+        (actual_msg,) = request.protocol.messages
         self.assertEqual(protocol_pb2.Message.CREATE_UDF, actual_msg.type)
         self.assertEqual(request.path, actual_msg.create_udf.path)
         self.assertEqual(request.name, actual_msg.create_udf.name)
@@ -563,7 +577,7 @@ class ListVolumesTestCase(RequestTestCase):
         request.start()
 
         self.assertEqual(1, len(request.protocol.messages))
-        actual_msg, = request.protocol.messages
+        (actual_msg,) = request.protocol.messages
         self.assertEqual(protocol_pb2.Message.LIST_VOLUMES, actual_msg.type)
 
     @defer.inlineCallbacks
@@ -592,8 +606,9 @@ class ListVolumesTestCase(RequestTestCase):
         self.request.processMessage(message)
 
         self.assertEqual(3, len(self.request.volumes), '3 volumes stored')
-        self.assertEqual([udf, share, root], self.request.volumes,
-                         'volumes stored')
+        self.assertEqual(
+            [udf, share, root], self.request.volumes, 'volumes stored'
+        )
 
         message = protocol_pb2.Message()
         message.type = protocol_pb2.Message.VOLUMES_END
@@ -641,10 +656,9 @@ class DeleteVolumeTestCase(RequestTestCase):
         request.start()
 
         self.assertEqual(1, len(request.protocol.messages))
-        actual_msg, = request.protocol.messages
+        (actual_msg,) = request.protocol.messages
         self.assertEqual(protocol_pb2.Message.DELETE_VOLUME, actual_msg.type)
-        self.assertEqual(
-            request.volume_id, actual_msg.delete_volume.volume)
+        self.assertEqual(request.volume_id, actual_msg.delete_volume.volume)
 
     @defer.inlineCallbacks
     def test_process_message_error(self):
@@ -685,7 +699,7 @@ class GetDeltaTestCase(RequestTestCase):
         request.start()
 
         self.assertEqual(1, len(request.protocol.messages))
-        actual_msg, = request.protocol.messages
+        (actual_msg,) = request.protocol.messages
         self.assertEqual(protocol_pb2.Message.GET_DELTA, actual_msg.type)
         self.assertEqual(request.share_id, actual_msg.get_delta.share)
 
@@ -707,11 +721,11 @@ class GetDeltaTestCase(RequestTestCase):
         self.request.processMessage(message)
 
         self.assertTrue(self.done_called, 'done() was called')
-        self.assertEqual(self.request.end_generation,
-                         message.delta_end.generation)
+        self.assertEqual(
+            self.request.end_generation, message.delta_end.generation
+        )
         self.assertEqual(self.request.full, message.delta_end.full)
-        self.assertEqual(self.request.free_bytes,
-                         message.delta_end.free_bytes)
+        self.assertEqual(self.request.free_bytes, message.delta_end.free_bytes)
 
     def test_process_message_content(self):
         """Test request processMessage for content."""
@@ -742,7 +756,7 @@ class GetDeltaTestCase(RequestTestCase):
         request.start()
 
         self.assertEqual(1, len(request.protocol.messages))
-        actual_msg, = request.protocol.messages
+        (actual_msg,) = request.protocol.messages
         self.assertEqual(protocol_pb2.Message.GET_DELTA, actual_msg.type)
         self.assertEqual(request.share_id, actual_msg.get_delta.share)
 
@@ -766,9 +780,9 @@ class TestAuth(RequestTestCase):
     def test_with_metadata(self):
         """Test with optional metadata."""
         protocol = FakedProtocol()
-        protocol.dummy_authenticate('my_token',
-                                    metadata={'version': '0.1',
-                                              'platform': sys.platform})
+        protocol.dummy_authenticate(
+            'my_token', metadata={'version': '0.1', 'platform': sys.platform}
+        )
         msgs = protocol.messages
         self.assertTrue(len(msgs), 1)
         msg = msgs[0]
@@ -877,7 +891,8 @@ class TestGenerationInRequestsPutContent(TestGenerationInRequests):
     def build_request(self):
         """Creates the request object."""
         return self.make_request(
-            'share', 'node', 'previous_hash', 'new_hash', 123, 456, 789, 'fd')
+            'share', 'node', 'previous_hash', 'new_hash', 123, 456, 789, 'fd'
+        )
 
     def build_message(self):
         """Creates the ending message for the request."""
@@ -915,8 +930,16 @@ class PutContentTestCase(RequestTestCase):
     def build_request(self, protocol=None):
         """Creates the request object."""
         return self.make_request(
-            'share', 'node', 'previous_hash', 'new_hash', 123, 456, 789, 'fd',
-            protocol=protocol)
+            'share',
+            'node',
+            'previous_hash',
+            'new_hash',
+            123,
+            456,
+            789,
+            'fd',
+            protocol=protocol,
+        )
 
     def test_max_payload_size(self):
         """Get the value from the protocol."""
@@ -951,7 +974,8 @@ class ChangePublicAccessTestCase(RequestTestCase):
         """Initialize testing protocol."""
         yield super(ChangePublicAccessTestCase, self).setUp()
         self.request = self.make_request(
-            share_id=SHARE, node_id=NODE, is_public=True)
+            share_id=SHARE, node_id=NODE, is_public=True
+        )
 
     def test_init(self):
         """Test request creation."""
@@ -962,18 +986,20 @@ class ChangePublicAccessTestCase(RequestTestCase):
     def test_start(self):
         """Test request start."""
         request = self.make_request(
-            share_id=SHARE, node_id=NODE, is_public=True, start=False)
+            share_id=SHARE, node_id=NODE, is_public=True, start=False
+        )
 
         request.start()
 
         self.assertEqual(1, len(request.protocol.messages))
-        actual_msg, = request.protocol.messages
+        (actual_msg,) = request.protocol.messages
         self.assertEqual(
-            actual_msg.type, protocol_pb2.Message.CHANGE_PUBLIC_ACCESS)
+            actual_msg.type, protocol_pb2.Message.CHANGE_PUBLIC_ACCESS
+        )
         self.assertEqual(
-            actual_msg.change_public_access.share, request.share_id)
-        self.assertEqual(
-            actual_msg.change_public_access.node, request.node_id)
+            actual_msg.change_public_access.share, request.share_id
+        )
+        self.assertEqual(actual_msg.change_public_access.node, request.node_id)
         self.assertTrue(actual_msg.change_public_access.is_public)
 
     @defer.inlineCallbacks
@@ -1014,9 +1040,10 @@ class ListPublicFilesTestCase(RequestTestCase):
         request.start()
 
         self.assertEqual(1, len(request.protocol.messages))
-        actual_msg, = request.protocol.messages
+        (actual_msg,) = request.protocol.messages
         self.assertEqual(
-            actual_msg.type, protocol_pb2.Message.LIST_PUBLIC_FILES)
+            actual_msg.type, protocol_pb2.Message.LIST_PUBLIC_FILES
+        )
 
     @defer.inlineCallbacks
     def test_process_message_error(self):

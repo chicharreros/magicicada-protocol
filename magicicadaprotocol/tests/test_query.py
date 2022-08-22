@@ -48,8 +48,9 @@ class TestQuery10(unittest.TestCase):
         items = [(a_id, b_id, a_hash) for _ in range(self.N)]
         multi_query_list = MultiQuery(None, items)
         multi_query_iter = MultiQuery(None, iter(items))
-        self.assertEqual(len(multi_query_list.queries),
-                         len(multi_query_iter.queries))
+        self.assertEqual(
+            len(multi_query_list.queries), len(multi_query_iter.queries)
+        )
 
 
 class TestQuery1000(TestQuery10):

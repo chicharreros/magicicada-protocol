@@ -137,25 +137,30 @@ class SSLContextTestCase(unittest.TestCase):
         """Test the no_verify option."""
         certs = FakeCerts(self, "localhost")
         server_context = ssl.DefaultOpenSSLContextFactory(
-            certs.server_key_path, certs.server_cert_path)
-        client_context = context.get_ssl_context(no_verify=True,
-                                                 hostname="localhost")
+            certs.server_key_path, certs.server_cert_path
+        )
+        client_context = context.get_ssl_context(
+            no_verify=True, hostname="localhost"
+        )
 
         yield self.verify_context(server_context, client_context)
 
     def test_no_hostname(self):
         """Test that calling without hostname arg raises proper error."""
-        self.assertRaises(error.CertificateError,
-                          context.get_ssl_context, False)
+        self.assertRaises(
+            error.CertificateError, context.get_ssl_context, False
+        )
 
     @defer.inlineCallbacks
     def test_fails_certificate(self):
         """A wrong certificate is rejected."""
         certs = FakeCerts(self, "localhost")
         server_context = ssl.DefaultOpenSSLContextFactory(
-            certs.server_key_path, certs.server_cert_path)
-        client_context = context.get_ssl_context(no_verify=False,
-                                                 hostname="localhost")
+            certs.server_key_path, certs.server_cert_path
+        )
+        client_context = context.get_ssl_context(
+            no_verify=False, hostname="localhost"
+        )
 
         yield self.assert_cert_failed_verify(server_context, client_context)
 
@@ -164,10 +169,12 @@ class SSLContextTestCase(unittest.TestCase):
         """A wrong hostname is rejected."""
         certs = FakeCerts(self, "thisiswronghost.net")
         server_context = ssl.DefaultOpenSSLContextFactory(
-            certs.server_key_path, certs.server_cert_path)
+            certs.server_key_path, certs.server_cert_path
+        )
         self.patch(context, "get_certificates", lambda: [certs.ca_cert])
-        client_context = context.get_ssl_context(no_verify=False,
-                                                 hostname="localhost")
+        client_context = context.get_ssl_context(
+            no_verify=False, hostname="localhost"
+        )
         yield self.assert_cert_failed_verify(server_context, client_context)
 
     @defer.inlineCallbacks
@@ -175,10 +182,12 @@ class SSLContextTestCase(unittest.TestCase):
         """A valid certificate passes checks."""
         certs = FakeCerts(self, "localhost")
         server_context = ssl.DefaultOpenSSLContextFactory(
-            certs.server_key_path, certs.server_cert_path)
+            certs.server_key_path, certs.server_cert_path
+        )
         self.patch(context, "get_certificates", lambda: [certs.ca_cert])
-        client_context = context.get_ssl_context(no_verify=False,
-                                                 hostname="localhost")
+        client_context = context.get_ssl_context(
+            no_verify=False, hostname="localhost"
+        )
 
         yield self.verify_context(server_context, client_context)
 
@@ -210,12 +219,15 @@ class CertLoadingTestCase(unittest.TestCase):
         certs = FakeCerts(self, "localhost")
         os.environ['SSL_CERTIFICATES_DIR'] = certs.cert_dir
         server_context = ssl.DefaultOpenSSLContextFactory(
-            certs.server_key_path, certs.server_cert_path)
-        client_context = context.get_ssl_context(no_verify=False,
-                                                 hostname="localhost")
+            certs.server_key_path, certs.server_cert_path
+        )
+        client_context = context.get_ssl_context(
+            no_verify=False, hostname="localhost"
+        )
         site = server.Site(FakeResource())
         port = reactor.listenSSL(0, site, server_context)
         self.addCleanup(port.stopListening)
         url = b"https://localhost:%d" % port.getHost().port
         yield self.assertFailure(
-            client.getPage(url, contextFactory=client_context), SSL.Error)
+            client.getPage(url, contextFactory=client_context), SSL.Error
+        )

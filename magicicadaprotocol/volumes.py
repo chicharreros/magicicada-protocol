@@ -66,22 +66,35 @@ class Volume:
         raise NotImplementedError
 
     def __eq__(self, other):
-        result = (self.volume_id == other.volume_id and
-                  self.node_id == other.node_id and
-                  self.free_bytes == other.free_bytes and
-                  self.generation == other.generation)
+        result = (
+            self.volume_id == other.volume_id
+            and self.node_id == other.node_id
+            and self.free_bytes == other.free_bytes
+            and self.generation == other.generation
+        )
         return result
 
 
 class ShareVolume(Volume):
     """A volume representing an accepted Share."""
 
-    def __init__(self, volume_id, node_id, generation,
-                 free_bytes, direction, share_name,
-                 other_username, other_visible_name, accepted, access_level):
+    def __init__(
+        self,
+        volume_id,
+        node_id,
+        generation,
+        free_bytes,
+        direction,
+        share_name,
+        other_username,
+        other_visible_name,
+        accepted,
+        access_level,
+    ):
         """Create the share."""
-        super(ShareVolume, self).__init__(volume_id, node_id,
-                                          generation, free_bytes)
+        super(ShareVolume, self).__init__(
+            volume_id, node_id, generation, free_bytes
+        )
         self.direction = direction
         self.share_name = share_name
         self.other_username = other_username
@@ -102,29 +115,34 @@ class ShareVolume(Volume):
             other_username=msg.other_username,
             other_visible_name=msg.other_visible_name,
             accepted=msg.accepted,
-            access_level=_access_prot2nice[msg.access_level])
+            access_level=_access_prot2nice[msg.access_level],
+        )
         result = cls(**kwargs)
         return result
 
     def __eq__(self, other):
-        result = (super(ShareVolume, self).__eq__(other) and
-                  self.direction == other.direction and
-                  self.share_name == other.share_name and
-                  self.other_username == other.other_username and
-                  self.other_visible_name == other.other_visible_name and
-                  self.accepted == other.accepted and
-                  self.access_level == other.access_level)
+        result = (
+            super(ShareVolume, self).__eq__(other)
+            and self.direction == other.direction
+            and self.share_name == other.share_name
+            and self.other_username == other.other_username
+            and self.other_visible_name == other.other_visible_name
+            and self.accepted == other.accepted
+            and self.access_level == other.access_level
+        )
         return result
 
 
 class UDFVolume(Volume):
     """A volume representing a User Defined Folder."""
 
-    def __init__(self, volume_id, node_id, generation,
-                 free_bytes, suggested_path):
+    def __init__(
+        self, volume_id, node_id, generation, free_bytes, suggested_path
+    ):
         """Create the UDF."""
-        super(UDFVolume, self).__init__(volume_id, node_id,
-                                        generation, free_bytes)
+        super(UDFVolume, self).__init__(
+            volume_id, node_id, generation, free_bytes
+        )
         self.suggested_path = suggested_path
 
     @classmethod
@@ -135,13 +153,16 @@ class UDFVolume(Volume):
             node_id=uuid.UUID(msg.node),
             generation=msg.generation,
             free_bytes=msg.free_bytes,
-            suggested_path=msg.suggested_path)
+            suggested_path=msg.suggested_path,
+        )
         result = cls(**kwargs)
         return result
 
     def __eq__(self, other):
-        result = (super(UDFVolume, self).__eq__(other) and
-                  self.suggested_path == other.suggested_path)
+        result = (
+            super(UDFVolume, self).__eq__(other)
+            and self.suggested_path == other.suggested_path
+        )
         return result
 
 
@@ -151,9 +172,11 @@ class RootVolume(Volume):
     def __init__(self, node_id, generation, free_bytes):
         """Create the volume."""
         super(RootVolume, self).__init__(
-            volume_id=None, node_id=node_id,
+            volume_id=None,
+            node_id=node_id,
             generation=generation,
-            free_bytes=free_bytes)
+            free_bytes=free_bytes,
+        )
 
     @classmethod
     def from_msg(cls, msg):
@@ -161,6 +184,7 @@ class RootVolume(Volume):
         kwargs = dict(
             node_id=uuid.UUID(msg.node),
             generation=msg.generation,
-            free_bytes=msg.free_bytes)
+            free_bytes=msg.free_bytes,
+        )
         result = cls(**kwargs)
         return result

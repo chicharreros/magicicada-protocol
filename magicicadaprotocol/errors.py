@@ -53,8 +53,11 @@ class StorageRequestError(StorageProtocolError):
         @param request: the request that generated this error.
         @param message: the message received that generated the error.
         """
-        error_name = protocol_pb2.Error.DESCRIPTOR.enum_types_by_name[
-            'ErrorType'].values_by_number[message.error.type].name
+        error_name = (
+            protocol_pb2.Error.DESCRIPTOR.enum_types_by_name['ErrorType']
+            .values_by_number[message.error.type]
+            .name
+        )
         super(StorageRequestError, self).__init__(error_name)
         #: the request that generated the error
         self.request = request
@@ -147,6 +150,7 @@ class QuotaExceededError(StorageRequestError):
         """
         # to avoid circular dependencies
         from magicicadaprotocol.request import ROOT
+
         super(QuotaExceededError, self).__init__(request, message)
         self.free_bytes = message.free_space_info.free_bytes
         if message.free_space_info.share_id:

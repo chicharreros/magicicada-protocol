@@ -45,8 +45,13 @@ class ProcessMessageTestCase(unittest.TestCase):
 
     def test_handles_EOF(self):
         gc = GetContent(
-            protocol=self.make_protocol(), share='share', node_id='node_id',
-            a_hash='sha1:hash', offset=0, callback=None)
+            protocol=self.make_protocol(),
+            share='share',
+            node_id='node_id',
+            a_hash='sha1:hash',
+            offset=0,
+            callback=None,
+        )
         gc.start()
         gc.parts = [b'foo', b'bar']
 
